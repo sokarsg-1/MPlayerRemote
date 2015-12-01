@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MPlayer Remote</string>
+    <string name="activity_server_list_title">Wybierz serwer, z którym chcesz się połączyć albo dodaj nowy serwer w menu.</string>
+    <string name="wrong_app_password_exeption">Złe hasło, spróbuj ponownie.</string>
+    
+    <string name="tile_for_dialog_FIRST_TIME_RUNING">Szyfrowanie danych serwerów</string>
+    <string name="text_for_explanation_set_a_password_for_this_app_from_dialog_FIRST_TIME_RUNING">Ustaw hasło do tej aplikacji:</string>
+    <string name="text_for_use_encryption_checkBox_from_dialog_FIRST_TIME_RUNING">Używać szyfrowania?</string>
+    <string name="text_for_exit_dialog_first_time_runing_button">Dalej</string> 
+    
+    <string name="title_for_dialog_GIVE_ME_A_APP_PASSWORD">Wprowadź hasło aplikacji</string>
+    <string name="text_for_remember_app_password_in_sesion_CheckBox_from_dialog_GIVE_ME_A_APP_PASSWORD">Zapamiętać hasło do aplikacji w tej sesji?</string>
+    <string name="text_for_check_app_password_Button_from_dialog_GIVE_ME_A_APP_PASSWORD">Sprawdź poprawność hasła aplikacji</string>
+        
+    <string name="title_for_dialog_GIVE_ME_A_APP_PASSWORD_BECAUSE_REMEMBER_APP_PASSWORD_IN_SESION_BOOILEAN_IS_FALSE">Wprowadź hasło aplikacji</string>
+    <string name="text_for_continue_with_given_app_password_Button">Sprawdź poprawność hasła aplikacji</string>
+    
+    <string name="title_for_dialog_GIVE_ME_A_SERVER_PASSWORD">Wprowadź hasło serwera</string>
+	<string name="text_for_connect_to_server_Button_in_dialog_give_me_a_server_password">Połącz z serwerem</string>
+    
+    <string name="title_for_dialog_ADD_NEW_SERVER_CRYPTO_ENABLED">Dodaj nowy serwer</string>
+	<string name="text_for_server_nametextView_crypto_enable">Nazwa serwera:</string>
+	<string name="text_for_ip_addresstextView_crypto_enabled">Adres IP:</string>
+	<string name="text_for_usernametextView_crypto_enabled">Nazwa użytkowika:</string>
+	<string name="text_for_passwordtextView_crypto_enabled">Hasło:</string>
+	<string name="text_for_saveButton_crypto_enabled">Zapisz</string>
+	<string name="text_for_cancelButton_crypto_enabled">Anuluj</string>
+	<string name="text_for_toast_fill_up_the_empty_spaces">Uzupełnij wszystkie pola</string> 
+	<string name="text_for_toast_correct_IP_address">Popraw adres IP</string>
+	<string name="text_for_toast_fields_should_not_contain_a_whitespace_character">Pola nie mogą zawierać białych znaków np. spacji.</string>
+	
+	<string name="title_for_dialog_CHOSE_SERVER_TO_EDIT">Wybierz serwer do edycji</string>
+	
+	<string name="title_for_dialog_EDIT_SERVER_CRYPTO_ENABLED">Edytuj dane serwera</string>
+	
+	<string name="title_for_dialog_DELETE_SERVER">Wybierz, który serwer usunąć</string>
+	<string name="title_for_dialog_DO_DELETE">Usunąć dane serwera </string>
+	<string name="text_for_do_delete_button">Usuń</string>
+	<string name="text_for_cancel_button">Anuluj</string>
+	
+    <string name="title_for_menu_item_add_new_server">Dodaj nowy serwer</string>
+    <string name="title_form_menu_item_delete_server">Usuń dane serwera</string>
+    <string name="title_for_menu_item_edit_server">Edytuj dane serwera</string>
+    <string name="title_for_menu_item_exit_from_app">Wyjdź</string>
+    <string name="title_for_menu_item_load_sublite">Wczytaj napisy</string>
+    <string name="title_for_menu_item_settings">Ustawienia</string>
+    <string name="title_for_menu_item_license">Licencje</string>
+    
+    <string name="text_for_use_encryption_in_SettingForServer_checkBox">Szyfruj dane serwerów SSH</string>
+    <string name="text_for_show_only_media_type_files_checkBox">Pokazuj jedynie pliki multimedialne</string>
+    <string name="text_for_toast_Edit_server_data_fill_server_password_field">Ustaw hasło aplikacji i edytuj dane serwerów w celu uzupełnienia pól z hasłami serwerów.</string>
+    <string name="text_for_know_file_extensions">Znane rozszerzenia plików multimedialnych</string>
+    <string name="text_for_ok_button">Zapisz</string>
+    <string name="text_for_title_of_dialog_choose_know_file_extensions">Wybierz rozszerzenia</string>
+    
+    <string name="text_for_progressdialog_from_connecttoserver">Trwa łączenie. Proszę czekać...</string>
+    <string name="text_for_toast_turn_wifi_or_3g_on_from_connecttoserver">Brak połączenia z siecią, włącz Wi-Fi, przesył danych przez sieć komórkową albo Wi-Fi Tethering</string>
+    <string name="text_for_toast_check_server_data_from_connecttoserver">Nie udało się połączyć z serwerem, sprawdź poprawność danych serwera</string>
+    
+    <string name="text_for_DIALOG_PLAY_A_FILE_from_FileChooser">Uruchomić odtwarzanie</string>
+    <string name="text_for_positiveButton_from_DIALOG_PLAY_A_FILE">Tak</string>
+	<string name="text_for_negativeButton_from_DIALOG_PLAY_A_FILE">Nie</string>
+	<string name="text_for_toast_you_do_not_have_rights_to_open_this_directory">Nie masz uprawnień do przeglądania tego katalogu</string>
+    <string name="text_for_toast_nothing_to_play">Brak plików do odtworzenia</string>
+    
+    <string name="text_for_first_line_of_notification_from_serviceplayafile">MPlayer odtwarza:</string>
+</resources>

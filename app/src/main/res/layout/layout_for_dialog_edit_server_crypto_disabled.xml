@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"  android:layout_height="wrap_content" android:layout_width="fill_parent">
+    <LinearLayout android:layout_height="wrap_content" android:layout_width="fill_parent" android:orientation="vertical" android:id="@+id/linearLayout1">
+        <TextView 
+            android:text="@string/text_for_server_nametextView_crypto_enable" 
+            android:layout_width="wrap_content" 
+            android:id="@+id/server_nametextView_crypto_disabled_from_edit_server" 
+            android:layout_height="fill_parent" 
+            android:layout_gravity="center_horizontal"></TextView>
+        <EditText 
+            android:id="@+id/server_name_in_dialog_edit_server_EditText_crypto_disabled_from_edit_server" 
+            android:layout_width="fill_parent" 
+            android:text="" 
+            android:layout_height="fill_parent"
+            android:gravity="center"  
+            android:layout_margin="5sp"></EditText>
+        <TextView 
+            android:text="@string/text_for_ip_addresstextView_crypto_enabled" 
+            android:layout_width="wrap_content" 
+            android:id="@+id/ip_addresstextView_crypto_disabled_from_edit_server" 
+            android:layout_gravity="center_horizontal" 
+            android:layout_height="fill_parent"></TextView>
+        <EditText 
+            android:id="@+id/IP_address_in_dialog_edit_server_EditText_crypto_disabled_from_edit_server" 
+            android:layout_width="fill_parent" 
+            android:text="" 
+            android:layout_height="fill_parent"
+            android:gravity="center"  
+            android:layout_margin="5sp"></EditText>
+        <TextView 
+            android:text="@string/text_for_usernametextView_crypto_enabled" 
+            android:layout_width="wrap_content" 
+            android:id="@+id/usernametextView_crypto_disabled_from_edit_server" 
+            android:layout_gravity="center_horizontal" 
+            android:layout_height="fill_parent"></TextView>
+        <EditText 
+            android:id="@+id/username_in_dialog_edit_server_EditText_crypto_disabled_from_edit_server" 
+            android:layout_width="fill_parent" 
+            android:text="" 
+            android:layout_height="fill_parent"
+            android:gravity="center"  
+            android:layout_margin="5sp"></EditText>
+
+        <RelativeLayout android:id="@+id/relativeLayout1"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_alignParentBottom="true">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dip"
+                android:layout_marginLeft="4dip"
+                android:layout_marginRight="4dip"
+                android:background="?android:attr/dividerVertical"
+                android:layout_alignParentTop="true"/>
+            <View
+                android:id="@+id/ViewColorPickerHelper"
+                android:layout_width="1dip"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginBottom="4dip"
+                android:layout_marginTop="4dip"
+                android:background="?android:attr/dividerVertical"
+                android:layout_centerHorizontal="true"/>
+            <Button
+                android:id="@+id/cancelButton_in_dialog_edit_server_crypto_disabled"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@id/ViewColorPickerHelper"
+                android:background="?android:attr/selectableItemBackground"
+                android:text="@string/text_for_cancelButton_crypto_enabled"
+                android:layout_alignParentBottom="true"/>
+            <Button
+                android:id="@+id/saveButton_in_dialog_edit_server_crypto_disabled"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:background="?android:attr/selectableItemBackground"
+                android:text="@string/text_for_saveButton_crypto_enabled"
+                android:layout_alignParentBottom="true"
+                android:layout_toRightOf="@id/ViewColorPickerHelper"/>
+        </RelativeLayout>
+
+    </LinearLayout>
+</ScrollView>

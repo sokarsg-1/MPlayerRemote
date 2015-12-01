@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array
+        name="know_media_file_extensions"
+        translatable="false">
+
+            <!--video file extensions-->
+            <item>webm</item>
+            <item>mkv</item>
+            <item>flv</item>
+            <item>vob</item>
+            <item>ogv</item>
+            <item>ogg</item>
+            <item>drc</item>
+            <item>gif</item>
+            <item>gifv</item>
+            <item>mng</item>
+            <item>avi</item>
+            <item>mov</item>
+            <item>qt</item>
+            <item>wmv</item>
+            <item>yuv</item>
+            <item>rm</item>
+            <item>rmvb</item>
+            <item>asf</item>
+            <item>mp4</item>
+            <item>m4p</item>
+            <item>m4v</item>
+            <item>mpg</item>
+            <item>mp2</item>
+            <item>mpeg</item>
+            <item>mpe</item>
+            <item>mpv</item>
+            <item>m2v</item>
+            <item>svi</item>
+            <item>3gp</item>
+            <item>3g2</item>
+            <item>mxf</item>
+            <item>roq</item>
+            <item>nsv</item>
+            <!--audio file extensions-->
+            <item>act</item>
+            <item>aiff</item>
+            <item>acc</item>
+            <item>amr</item>
+            <item>ape</item>
+            <item>au</item>
+            <item>awb</item>
+            <item>dct</item>
+            <item>dss</item>
+            <item>dvf</item>
+            <item>flac</item>
+            <item>gsm</item>
+            <item>iklax</item>
+            <item>ivs</item>
+            <item>m4a</item>
+            <item>mmf</item>
+            <item>mp3</item>
+            <item>mpc</item>
+            <item>msv</item>
+            <item>oga</item>
+            <item>opus</item>
+            <item>ra</item>
+            <item>rm</item>
+            <item>raw</item>
+            <item>sln</item>
+            <item>tta</item>
+            <item>vox</item>
+            <item>wav</item>
+            <item>wma</item>
+            <item>wv</item>
+
+    </string-array>
+</resources>
+

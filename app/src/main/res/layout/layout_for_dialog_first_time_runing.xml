@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"  android:layout_width="fill_parent"  android:layout_height="fill_parent">	
+	<LinearLayout android:layout_height="fill_parent" android:layout_width="250dp" android:orientation="vertical" android:id="@+id/linearLayout1">
+		   	
+		   	<TextView
+	            android:id="@+id/explenation_TextView"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:layout_gravity="left"
+	            android:text="@string/tile_for_dialog_FIRST_TIME_RUNING"
+				android:layout_margin="10dp"
+				android:textAppearance="?android:attr/textAppearanceLarge"
+				android:textColor="#ff00ddff" />
+
+			<View
+				android:id="@+id/line"
+				android:layout_width="fill_parent"
+
+
+				android:layout_height="2dp"
+				android:background="#ff00ddff"/>
+	  	
+	        <CheckBox
+	            android:id="@+id/use_encryption_checkBox"
+	            android:layout_width="fill_parent"
+	            android:layout_height="wrap_content"
+				android:layout_margin="10dp"
+	            android:checked="true"
+				android:button="@null"
+				android:drawableRight="?android:attr/listChoiceIndicatorMultiple"
+	            android:text="@string/text_for_use_encryption_in_SettingForServer_checkBox"
+				android:textAppearance="?android:attr/textAppearanceMedium"/>
+	
+	        <TextView
+	            android:id="@+id/explanation_set_a_password_for_this_app"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+
+	            android:text="@string/text_for_explanation_set_a_password_for_this_app_from_dialog_FIRST_TIME_RUNING"
+	            android:textAppearance="?android:attr/textAppearanceSmall" />
+	
+	        <EditText
+	            android:id="@+id/set_app_passswordEditText"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+				android:layout_marginBottom="10dp"
+	            android:ems="10"
+	            android:inputType="textPassword" />
+
+			<View
+				android:layout_width="match_parent"
+				android:layout_height="1dip"
+				android:layout_marginLeft="4dip"
+				android:layout_marginRight="4dip"
+				android:background="?android:attr/dividerVertical"
+				android:layout_alignParentTop="true"/>
+	
+	        <Button
+	            android:id="@+id/exit_dialog_first_time_runing_button"
+	            android:layout_width="fill_parent"
+	            android:layout_height="wrap_content"
+	            android:text="@string/text_for_exit_dialog_first_time_runing_button"
+				style="?android:attr/borderlessButtonStyle"/>
+	
+	</LinearLayout>
+</ScrollView>
