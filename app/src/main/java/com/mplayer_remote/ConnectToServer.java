@@ -255,9 +255,15 @@ public class ConnectToServer extends Activity{
 		// łączenie z przekazanym przez Intent serwerem
 		try
 		{
+			String justIPAddressString = "";
+			int portint = 22;
+
+			justIPAddressString = this.getIP(iPAddressString);
+			portint = this.getPort(iPAddressString);
+
 			/* Create a connection instance */
 
-			connection = new Connection(iPAddressString);
+			connection = new Connection(justIPAddressString, portint);
 
 			/* Now connect */
 
@@ -288,6 +294,42 @@ public class ConnectToServer extends Activity{
 			//System.exit(2);
 		}	
     }
+
+	private String getIP(String iPAddressString){
+		String justIPAddressString = "";
+		int numberOfColons = 0;
+		for(int i = 0; i < iPAddressString.length(); i++){
+			if (iPAddressString.charAt(i) == ':'){
+				numberOfColons++;
+			}
+		}
+
+		if (numberOfColons == 1 || numberOfColons == 8){
+			justIPAddressString = iPAddressString.substring(0, iPAddressString.lastIndexOf(":"));
+		}else{
+			justIPAddressString = iPAddressString;
+		}
+
+		return justIPAddressString;
+	}
+
+	private int getPort(String iPAddressString){
+		int portint = 22;
+		int numberOfColons = 0;
+		for(int i = 0; i < iPAddressString.length(); i++){
+			if (iPAddressString.charAt(i) == ':'){
+				numberOfColons++;
+			}
+		}
+
+		if (numberOfColons == 1 || numberOfColons == 8){
+			portint = Integer.parseInt(iPAddressString.substring(iPAddressString.lastIndexOf(":") + 1, iPAddressString.length()));
+		}else{
+			portint = 22;
+		}
+
+		return portint;
+	}
 
 	/**
 	 * Wysyła do serwera polecenie <code>commandToSendString</code>.

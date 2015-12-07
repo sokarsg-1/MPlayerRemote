@@ -21,7 +21,7 @@
     
     <string name="title_for_dialog_ADD_NEW_SERVER_CRYPTO_ENABLED">Dodaj nowy serwer</string>
 	<string name="text_for_server_nametextView_crypto_enable">Nazwa serwera:</string>
-	<string name="text_for_ip_addresstextView_crypto_enabled">Adres IP:</string>
+	<string name="text_for_ip_addresstextView_crypto_enabled">Adres IP (dla niestandardowego portu IP:port):</string>
 	<string name="text_for_usernametextView_crypto_enabled">Nazwa użytkowika:</string>
 	<string name="text_for_passwordtextView_crypto_enabled">Hasło:</string>
 	<string name="text_for_saveButton_crypto_enabled">Zapisz</string>
