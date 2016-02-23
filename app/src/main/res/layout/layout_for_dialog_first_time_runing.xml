@@ -1,30 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"  android:layout_width="fill_parent"  android:layout_height="fill_parent">	
-	<LinearLayout android:layout_height="fill_parent" android:layout_width="250dp" android:orientation="vertical" android:id="@+id/linearLayout1">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"  android:layout_width="match_parent"  android:layout_height="match_parent">
+	<LinearLayout android:layout_height="match_parent" android:layout_width="match_parent" android:orientation="vertical" android:id="@+id/linearLayout1">
 		   	
-		   	<TextView
-	            android:id="@+id/explenation_TextView"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_gravity="left"
-	            android:text="@string/tile_for_dialog_FIRST_TIME_RUNING"
-				android:layout_margin="10dp"
-				android:textAppearance="?android:attr/textAppearanceLarge"
-				android:textColor="#ff00ddff" />
 
-			<View
-				android:id="@+id/line"
-				android:layout_width="fill_parent"
-
-
-				android:layout_height="2dp"
-				android:background="#ff00ddff"/>
 	  	
 	        <CheckBox
 	            android:id="@+id/use_encryption_checkBox"
 	            android:layout_width="fill_parent"
 	            android:layout_height="wrap_content"
-				android:layout_margin="10dp"
+				android:layout_marginTop="10dp"
+				android:layout_marginLeft="20dp"
+				android:layout_marginRight="20dp"
 	            android:checked="true"
 				android:button="@null"
 				android:drawableRight="?android:attr/listChoiceIndicatorMultiple"
@@ -35,7 +21,8 @@
 	            android:id="@+id/explanation_set_a_password_for_this_app"
 	            android:layout_width="match_parent"
 	            android:layout_height="wrap_content"
-
+				android:gravity="center_horizontal"
+				android:layout_marginTop="10dp"
 	            android:text="@string/text_for_explanation_set_a_password_for_this_app_from_dialog_FIRST_TIME_RUNING"
 	            android:textAppearance="?android:attr/textAppearanceSmall" />
 	
@@ -44,7 +31,8 @@
 	            android:layout_width="match_parent"
 	            android:layout_height="wrap_content"
 				android:layout_marginBottom="10dp"
-	            android:ems="10"
+				android:layout_marginLeft="20dp"
+				android:layout_marginRight="20dp"
 	            android:inputType="textPassword" />
 
 			<View

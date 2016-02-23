@@ -3,8 +3,8 @@
   xmlns:android="http://schemas.android.com/apk/res/android">
   <item android:id="@+id/menu_item_settings" android:title="@string/title_for_menu_item_settings"></item>
   <item android:id="@+id/menu_item_add_new_server" android:title="@string/title_for_menu_item_add_new_server"/>
-  <item android:id="@+id/menu_item_edit_server" android:title="@string/title_for_menu_item_edit_server"/>
-  <item android:id="@+id/menu_item_delete_server" android:title="@string/title_form_menu_item_delete_server"/>
+  <item android:id="@+id/menu_item_edit_server" android:title="@string/title_for_menu_item_edit_server" android:enabled="false"/>
+  <item android:id="@+id/menu_item_delete_server" android:title="@string/title_form_menu_item_delete_server" android:enabled="false"/>
   <item android:id="@+id/medu_item_license" android:title="@string/title_for_menu_item_license"/>
   <item android:id="@+id/menu_item_exit_from_app" android:title="@string/title_for_menu_item_exit_from_app"/>
   

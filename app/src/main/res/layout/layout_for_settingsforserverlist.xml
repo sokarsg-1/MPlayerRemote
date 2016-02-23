@@ -26,11 +26,14 @@
             android:id="@+id/use_encryption_in_SettingForServer_checkBox"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
             android:layout_below="@id/line1"
             android:text="@string/text_for_use_encryption_in_SettingForServer_checkBox"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:gravity="center_vertical"
+
             android:button="@null"
             android:drawableRight="?android:attr/listChoiceIndicatorMultiple"
             android:checked="false" />
@@ -48,11 +51,14 @@
             android:id="@+id/show_only_media_type_files_checkBox"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
             android:layout_below="@id/line2"
             android:text="@string/text_for_show_only_media_type_files_checkBox"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:gravity="center_vertical"
+
             android:button="@null"
             android:drawableRight="?android:attr/listChoiceIndicatorMultiple"
             android:checked="true" />

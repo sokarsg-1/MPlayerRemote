@@ -20,10 +20,10 @@
 	<string name="text_for_connect_to_server_Button_in_dialog_give_me_a_server_password">Connect to server</string>
     
 	<string name="title_for_dialog_ADD_NEW_SERVER_CRYPTO_ENABLED">Add new server</string>
-	<string name="text_for_server_nametextView_crypto_enable">Server name:</string>
-	<string name="text_for_ip_addresstextView_crypto_enabled">IP address (for custom port number type IP:port):</string>
-	<string name="text_for_usernametextView_crypto_enabled">Username:</string>
-	<string name="text_for_passwordtextView_crypto_enabled">Password:</string>
+	<string name="text_for_server_nametextView_crypto_enable">Server name</string>
+	<string name="text_for_ip_addresstextView_crypto_enabled">IP address or IP:port</string>
+	<string name="text_for_usernametextView_crypto_enabled">Username</string>
+	<string name="text_for_passwordtextView_crypto_enabled">Password</string>
 	<string name="text_for_saveButton_crypto_enabled">Save</string>
 	<string name="text_for_cancelButton_crypto_enabled">Cancel</string> 
 	<string name="text_for_toast_fill_up_the_empty_spaces">Fill up the empty spaces</string>
@@ -35,7 +35,8 @@
 	<string name="title_for_dialog_EDIT_SERVER_CRYPTO_ENABLED">Edit server data</string>
 	
 	<string name="title_for_dialog_DELETE_SERVER">Choose a server to delete</string>
-	<string name="title_for_dialog_DO_DELETE">Delete server </string> 
+	<string name="title_for_dialog_DO_DELETE">Delete server </string>
+    <string name="message_in_dialog_DO_DELATE">Delate server</string>
 	<string name="text_for_do_delete_button">Delete</string>
 	<string name="text_for_cancel_button">Cancel</string>
 	

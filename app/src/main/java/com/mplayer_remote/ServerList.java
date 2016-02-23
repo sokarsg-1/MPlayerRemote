@@ -45,8 +45,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
-import android.view.ViewManager;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -104,9 +102,9 @@ public class ServerList extends Activity{
 	private static final int DIALOG_ADD_NEW_SERVER_CRYPTO_DISABLED = 6;
 	
 	/**
-	 * Numer okna dialogowego <code>DIALOG_CHOSE_SERVER_TO_EDIT</code>.
+	 * Numer okna dialogowego <code>DIALOG_CHOOSE_SERVER_TO_EDIT</code>.
 	 */
-	private static final int DIALOG_CHOSE_SERVER_TO_EDIT = 7;
+	private static final int DIALOG_CHOOSE_SERVER_TO_EDIT = 7;
 	
 	/**
 	 * Numer okna dialogowego <code>DIALOG_EDIT_SERVER_CRYPTO_ENABLED</code>.
@@ -262,7 +260,7 @@ public class ServerList extends Activity{
 	/**
 	 * Lista obiektów klasy {@link com.mplayer_remote.Server}. Tu jest zapisywana odszyfrowana z pamięci urządzenia lista serwerów SSH. 
 	 */
-	private List <Server> serverListArrayList = new ArrayList<Server>();
+	private List<Server> serverListArrayList = new ArrayList<Server>();
 	//private List<Server> input =  new ArrayList<Server>(); //tu wczytuje 
 		
 		//XML 
@@ -375,7 +373,7 @@ public class ServerList extends Activity{
         	showdialog_GIVE_ME_A_APP_PASSWORD();
         	
         }else if (isCryptoEnabledboolean == true && appPasswordcharArray != null && mStateHolder.mIsShowingDialog_FIRST_TIME_RUNING == false){		// I check && mStateHolder.mIsShowingDialog_FIRST_TIME_RUNING == false because screen rotation can trigger this when back form SettingsForAPP
-        	Log.v(TAG, "(isCryptoEnabledboolean == true && appPasswordcharArray != null && mStateHolder.mIsShowingDialog_FIRST_TIME_RUNING == fals)");
+        	Log.v(TAG, "(isCryptoEnabledboolean == true && appPasswordcharArray != null && mStateHolder.mIsShowingDialog_FIRST_TIME_RUNING == false)");
         	try {
         		serverListArrayList = aXMLReaderWriter.decryptFileWithXMLAndParseItToServerList(appPasswordcharArray);
 				
@@ -387,6 +385,8 @@ public class ServerList extends Activity{
 		 					button_connect_to.setPadding(5, 5, 5, 5);
 		 		         	button_connect_to.setText(serverListArrayList.get(i).getServerName());
 		 		         	button_connect_to.setId(i);
+								//custom look of button
+					   		button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.server_button_custom));
 		 		         	
 		 		         	final Intent intent_start_ConnectToServer = new Intent(getApplicationContext(), ConnectToServer.class);
 		 					intent_start_ConnectToServer.putExtra("server_name", serverListArrayList.get(i).getServerName());
@@ -426,7 +426,8 @@ public class ServerList extends Activity{
 		 					button_connect_to.setPadding(5, 5, 5, 5);
 		 		         	button_connect_to.setText(serverListArrayList.get(i).getServerName());
 		 		         	button_connect_to.setId(i);
-		 		         	
+						   		//custom look of button
+						  	button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.server_button_custom));
 		 					
 		 		         	button_connect_to.setOnClickListener(new OnClickListener() {
 		 						
@@ -521,7 +522,7 @@ public class ServerList extends Activity{
     	 if (rememberAppPasswordInSesionboolean == false){
 	       	  removeDialog(DIALOG_ADD_NEW_SERVER_CRYPTO_ENABLED);
 	       	  removeDialog(DIALOG_DELETE_SERVER);
-	       	  removeDialog(DIALOG_CHOSE_SERVER_TO_EDIT);
+	       	  removeDialog(DIALOG_CHOOSE_SERVER_TO_EDIT);
 	       	  removeDialog(DIALOG_EDIT_SERVER_CRYPTO_ENABLED);
 	       	  removeDialog(DIALOG_GIVE_ME_A_APP_PASSWORD_BECAUSE_REMEMBER_APP_PASSWORD_IN_SESION_BOOLEAN_IS_FALSE);
 	       	  removeDialog(DIALOG_GIVE_ME_A_APP_PASSWORD_BECAUSE_REMEMBER_APP_PASSWORD_IN_SESION_BOOLEAN_IS_FALSE_AND_I_NEED_IT_TO_START_SETTINGSFORSERVERLIST);
@@ -600,8 +601,9 @@ public class ServerList extends Activity{
     	switch(id) {
     	case DIALOG_FIRST_TIME_RUNING:
     		
-    		dialog_FIRST_TIME_RUNING.requestWindowFeature(Window.FEATURE_NO_TITLE);
+    		//dialog_FIRST_TIME_RUNING.requestWindowFeature(Window.FEATURE_NO_TITLE);
     		dialog_FIRST_TIME_RUNING.setContentView(R.layout.layout_for_dialog_first_time_runing);
+			dialog_FIRST_TIME_RUNING.setTitle(R.string.tile_for_dialog_FIRST_TIME_RUNING);
     		dialog_FIRST_TIME_RUNING.setOnCancelListener(new OnCancelListener() {
 				
 				@Override
@@ -720,6 +722,9 @@ public class ServerList extends Activity{
 					 					button_connect_to.setPadding(5, 5, 5, 5);
 					 		         	button_connect_to.setText(serverListArrayList.get(i).getServerName());
 					 		         	button_connect_to.setId(i);
+									    	//custom look of button
+									    button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.server_button_custom));
+
 					 		         	final Intent intent_start_ConnectToServer = new Intent(getApplicationContext(), ConnectToServer.class);
 					 					intent_start_ConnectToServer.putExtra("server_name", serverListArrayList.get(i).getServerName());
 					 					intent_start_ConnectToServer.putExtra("IP_address", serverListArrayList.get(i).getIPAddress());
@@ -745,8 +750,9 @@ public class ServerList extends Activity{
 			});
     		break;
         case DIALOG_GIVE_ME_A_APP_PASSWORD:
-        	dialog_GIVE_ME_A_APP_PASSWORD.requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         	dialog_GIVE_ME_A_APP_PASSWORD.setContentView(R.layout.layout_for_dialog_give_me_a_app_password);
+			dialog_GIVE_ME_A_APP_PASSWORD.setTitle(R.string.title_for_dialog_GIVE_ME_A_APP_PASSWORD);
         	dialog_GIVE_ME_A_APP_PASSWORD.setOnCancelListener(new OnCancelListener() {
 				
 				@Override
@@ -789,6 +795,9 @@ public class ServerList extends Activity{
 					 					button_connect_to.setPadding(5, 5, 5, 5);
 					 		         	button_connect_to.setText(serverListArrayList.get(i).getServerName());
 					 		         	button_connect_to.setId(i);
+									    //custom look of button
+									    button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.server_button_custom));
+
 					 		         	final Intent intent_start_ConnectToServer = new Intent(getApplicationContext(), ConnectToServer.class);
 					 					intent_start_ConnectToServer.putExtra("server_name", serverListArrayList.get(i).getServerName());
 					 					intent_start_ConnectToServer.putExtra("IP_address", serverListArrayList.get(i).getIPAddress());
@@ -893,7 +902,7 @@ public class ServerList extends Activity{
         	
         case DIALOG_GIVE_ME_A_APP_PASSWORD_BECAUSE_REMEMBER_APP_PASSWORD_IN_SESION_BOOLEAN_IS_FALSE_AND_I_NEED_IT_TO_START_SETTINGSFORSERVERLIST:
         	dialog_GIVE_ME_A_APP_PASSWORD_BECAUSE_REMEMBER_APP_PASSWORD_IN_SESION_BOOLEAN_IS_FALSE_AND_I_NEED_IT_TO_START_SETTINGSFORSERVERLIST.setContentView(R.layout.layout_for_dialog__because_remember_app_password_in_sesion_boolean_is_false);
-        	//dialog_GIVE_ME_A_APP_PASSWORD_BECAUSE_REMEMBER_APP_PASSWORD_IN_SESION_BOOLEAN_IS_FALSE_AND_I_NEED_IT_TO_START_SETTINGSFORSERVERLIST.setTitle(R.string.title_for_dialog_GIVE_ME_A_APP_PASSWORD_BECAUSE_REMEMBER_APP_PASSWORD_IN_SESION_BOOILEAN_IS_FALSE);
+        	dialog_GIVE_ME_A_APP_PASSWORD_BECAUSE_REMEMBER_APP_PASSWORD_IN_SESION_BOOLEAN_IS_FALSE_AND_I_NEED_IT_TO_START_SETTINGSFORSERVERLIST.setTitle(R.string.title_for_dialog_GIVE_ME_A_APP_PASSWORD_BECAUSE_REMEMBER_APP_PASSWORD_IN_SESION_BOOILEAN_IS_FALSE);
         	Button continue_with_given_app_password_Button2 = (Button) dialog_GIVE_ME_A_APP_PASSWORD_BECAUSE_REMEMBER_APP_PASSWORD_IN_SESION_BOOLEAN_IS_FALSE_AND_I_NEED_IT_TO_START_SETTINGSFORSERVERLIST.findViewById(R.id.continue_with_given_app_password_Button);
         	continue_with_given_app_password_Button2.setOnClickListener(new OnClickListener() {
      			
@@ -943,9 +952,9 @@ public class ServerList extends Activity{
         	
         case DIALOG_GIVE_ME_A_SERVER_PASSWORD:
         	
-        	dialog_GIVE_ME_A_SERVER_PASSWORD.requestWindowFeature(Window.FEATURE_NO_TITLE);
         	dialog_GIVE_ME_A_SERVER_PASSWORD.setContentView(R.layout.layout_for_dialog_give_me_a_server_password);
-        	
+			dialog_GIVE_ME_A_SERVER_PASSWORD.setTitle(R.string.title_for_dialog_GIVE_ME_A_SERVER_PASSWORD);
+
         	final Button connect_to_server_button_in_DIALOG_GIVE_ME_A_SERVER_PASSWORD = (Button) dialog_GIVE_ME_A_SERVER_PASSWORD.findViewById(R.id.connect_to_server_Button_in_dialog_give_me_a_server_password);
         	connect_to_server_button_in_DIALOG_GIVE_ME_A_SERVER_PASSWORD.setOnClickListener(new OnClickListener() {
      			
@@ -1197,8 +1206,8 @@ public class ServerList extends Activity{
             break;
 
         
-        case DIALOG_CHOSE_SERVER_TO_EDIT:
-        	Log.v(TAG,"Wszedłem do onCreate DIALOG_CHOSE_SERVER_TO_EDIT");
+        case DIALOG_CHOOSE_SERVER_TO_EDIT:
+        	Log.v(TAG,"Wszedłem do onCreate DIALOG_CHOOSE_SERVER_TO_EDIT");
         	itemsFor_DIALOG_EDIT_SERVER = new CharSequence[serverListArrayList.size()];
     		for (int i = 0; i < serverListArrayList.size(); i++){
     			
@@ -1212,7 +1221,7 @@ public class ServerList extends Activity{
         	        //Toast.makeText(getApplicationContext(), items_for_DIALOG_EDIT_SERVER[item], Toast.LENGTH_SHORT).show();
         	        serverToEditint = item;
         	        Log.v(TAG,"server do edycji ma numer: " + item);
-        	        removeDialog(DIALOG_CHOSE_SERVER_TO_EDIT);
+        	        removeDialog(DIALOG_CHOOSE_SERVER_TO_EDIT);
         	        if (isCryptoEnabledboolean == true){
         	        	showDialog(DIALOG_EDIT_SERVER_CRYPTO_ENABLED);	
         	        }else{
@@ -1478,9 +1487,10 @@ public class ServerList extends Activity{
         	break;
         
         case DIALOG_DO_DELATE:
-        	Log.v(TAG,"Wszedłem do onCreate DIALOG_DO_DELATE");
+        	Log.v(TAG, "Wszedłem do onCreate DIALOG_DO_DELATE");
         	AlertDialog.Builder builderDIALOG_DO_DELATE = new AlertDialog.Builder(mContext);
-			builderDIALOG_DO_DELATE.setMessage(getResources().getString(R.string.title_for_dialog_DO_DELETE)+ " " + itemsFor_DIALOG_DELETE_SERVER[serverToDelete] + "?");
+			builderDIALOG_DO_DELATE.setTitle(getResources().getString(R.string.title_for_dialog_DO_DELETE));
+			builderDIALOG_DO_DELATE.setMessage(getResources().getString(R.string.message_in_dialog_DO_DELATE) + " " + itemsFor_DIALOG_DELETE_SERVER[serverToDelete] + "?");
         	// Add the buttons
         	builderDIALOG_DO_DELATE.setPositiveButton(R.string.text_for_do_delete_button, new DialogInterface.OnClickListener() {
         	           public void onClick(DialogInterface dialog, int id) {
@@ -1572,7 +1582,7 @@ public class ServerList extends Activity{
         if (id == DIALOG_DO_DELATE){
         	dialog = dialog_DO_DELATE;
         }
-        if (id == DIALOG_CHOSE_SERVER_TO_EDIT){
+        if (id == DIALOG_CHOOSE_SERVER_TO_EDIT){
         	dialog = dialog_CHOSE_SERVER_TO_EDIT;
         }
         if (id == DIALOG_EDIT_SERVER_CRYPTO_ENABLED){
@@ -1598,12 +1608,12 @@ public class ServerList extends Activity{
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_for_serverlist, menu);
-        /*
-        if (serverListArrayList.size() == 0){
-        	menu.getItem(2).setEnabled(false);
-        	menu.getItem(3).setEnabled(false);
+
+        if (serverListArrayList.size() > 0){
+        	menu.getItem(2).setEnabled(true);
+        	menu.getItem(3).setEnabled(true);
         }
-        */
+
         return true;
     }
     /**
@@ -1613,12 +1623,12 @@ public class ServerList extends Activity{
      */
     @Override
     public boolean onPrepareOptionsMenu (Menu menu) {
-        /*
-    	if (serverListArrayList.size() == 0){
-        	menu.getItem(2).setEnabled(false);
-        	menu.getItem(3).setEnabled(false);
+
+    	if (serverListArrayList.size() > 0){
+        	menu.getItem(2).setEnabled(true);
+        	menu.getItem(3).setEnabled(true);
         }
-        */
+
         return true;
     }
     /**
@@ -1659,8 +1669,8 @@ public class ServerList extends Activity{
         	showDialog(DIALOG_DELETE_SERVER);
         	return true;
         case R.id.menu_item_edit_server:
-        	//removeDialog(DIALOG_CHOSE_SERVER_TO_EDIT);
-        	showDialog(DIALOG_CHOSE_SERVER_TO_EDIT);
+        	//removeDialog(DIALOG_CHOOSE_SERVER_TO_EDIT);
+        	showDialog(DIALOG_CHOOSE_SERVER_TO_EDIT);
         	return true;
         case R.id.medu_item_license:
         	showDialog(DIALOG_LICENSE);
