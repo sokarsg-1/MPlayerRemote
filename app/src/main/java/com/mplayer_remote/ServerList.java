@@ -325,7 +325,7 @@ public class ServerList extends Activity{
         ll.addView(text);
         sv.addView(ll);
         this.setContentView(sv);
-        
+
            	//creating a XML
         Context mContext = getApplicationContext();
         aXMLReaderWriter = new XMLReaderWriter(mContext);
@@ -386,8 +386,10 @@ public class ServerList extends Activity{
 		 		         	button_connect_to.setText(serverListArrayList.get(i).getServerName());
 		 		         	button_connect_to.setId(i);
 								//custom look of button
-					   		button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.server_button_custom));
-		 		         	
+					   		button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.buttontheme_btn_default_holo_light));
+					   			//enabling menu item menu_item_edit_server and menu_item_delete_server
+					   		invalidateOptionsMenu();
+
 		 		         	final Intent intent_start_ConnectToServer = new Intent(getApplicationContext(), ConnectToServer.class);
 		 					intent_start_ConnectToServer.putExtra("server_name", serverListArrayList.get(i).getServerName());
 		 					intent_start_ConnectToServer.putExtra("IP_address", serverListArrayList.get(i).getIPAddress());
@@ -427,8 +429,10 @@ public class ServerList extends Activity{
 		 		         	button_connect_to.setText(serverListArrayList.get(i).getServerName());
 		 		         	button_connect_to.setId(i);
 						   		//custom look of button
-						  	button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.server_button_custom));
-		 					
+						  	button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.buttontheme_btn_default_holo_light));
+					   			//enabling menu item menu_item_edit_server and menu_item_delete_server
+					   		invalidateOptionsMenu();
+
 		 		         	button_connect_to.setOnClickListener(new OnClickListener() {
 		 						
 		 						@Override
@@ -723,8 +727,9 @@ public class ServerList extends Activity{
 					 		         	button_connect_to.setText(serverListArrayList.get(i).getServerName());
 					 		         	button_connect_to.setId(i);
 									    	//custom look of button
-									    button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.server_button_custom));
-
+									    button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.buttontheme_btn_default_holo_light));
+								   			//enabling menu item menu_item_edit_server and menu_item_delete_server
+								   		invalidateOptionsMenu();
 					 		         	final Intent intent_start_ConnectToServer = new Intent(getApplicationContext(), ConnectToServer.class);
 					 					intent_start_ConnectToServer.putExtra("server_name", serverListArrayList.get(i).getServerName());
 					 					intent_start_ConnectToServer.putExtra("IP_address", serverListArrayList.get(i).getIPAddress());
@@ -795,8 +800,10 @@ public class ServerList extends Activity{
 					 					button_connect_to.setPadding(5, 5, 5, 5);
 					 		         	button_connect_to.setText(serverListArrayList.get(i).getServerName());
 					 		         	button_connect_to.setId(i);
-									    //custom look of button
-									    button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.server_button_custom));
+									   		 //custom look of button
+									    button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.buttontheme_btn_default_holo_light));
+								   			//enabling menu item menu_item_edit_server and menu_item_delete_server
+								   		invalidateOptionsMenu();
 
 					 		         	final Intent intent_start_ConnectToServer = new Intent(getApplicationContext(), ConnectToServer.class);
 					 					intent_start_ConnectToServer.putExtra("server_name", serverListArrayList.get(i).getServerName());
@@ -1608,12 +1615,6 @@ public class ServerList extends Activity{
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_for_serverlist, menu);
-
-        if (serverListArrayList.size() > 0){
-        	menu.getItem(2).setEnabled(true);
-        	menu.getItem(3).setEnabled(true);
-        }
-
         return true;
     }
     /**
@@ -1624,7 +1625,7 @@ public class ServerList extends Activity{
     @Override
     public boolean onPrepareOptionsMenu (Menu menu) {
 
-    	if (serverListArrayList.size() > 0){
+    	if (serverListArrayList.size() > 0 ){
         	menu.getItem(2).setEnabled(true);
         	menu.getItem(3).setEnabled(true);
         }
