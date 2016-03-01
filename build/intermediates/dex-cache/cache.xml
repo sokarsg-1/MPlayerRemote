@@ -2,11 +2,32 @@
 <items version="2" >
 
     <item
+        jar="/home/sokar/Android/Sdk/extras/android/m2repository/com/android/support/support-annotations/22.0.0/support-annotations-22.0.0.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="685d0b2c590447e85284ed84712cb363ba04eff8">
+        <dex dex="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/pre-dexed/debug/support-annotations-22.0.0-e187f13e9bfcc552f8b5633acffb167427272090.jar" />
+    </item>
+    <item
         jar="/home/sokar/Android/Sdk/extras/android/m2repository/com/android/support/support-v4/19.0.1/support-v4-19.0.1.jar"
         jumboMode="false"
         revision="22.0.1"
         sha1="587da9a481ffd341d2fa091704489b89845ddacd">
         <dex dex="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/pre-dexed/release/support-v4-19.0.1-a71f5325d9dea17a04f1af50780c50d3d8892dd8.jar" />
+    </item>
+    <item
+        jar="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/exploded-aar/com.android.support/support-v4/22.0.0/jars/classes.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="4e86306289ace4aa0cfec44a05ed2b410d36989d">
+        <dex dex="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/pre-dexed/debug/classes-ffb361523d7256ec7c6f7d438cabe588e45c390e.jar" />
+    </item>
+    <item
+        jar="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/exploded-aar/com.android.support/support-v4/22.0.0/jars/libs/internal_impl-22.0.0.jar"
+        jumboMode="false"
+        revision="22.0.1"
+        sha1="b5b92f469d515a13d778900f6d50c03d12f35504">
+        <dex dex="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/pre-dexed/debug/internal_impl-22.0.0-d5ff2d04c1bd2a75108ea28ceb54973b6838a8b7.jar" />
     </item>
 
 </items>
