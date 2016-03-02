@@ -379,35 +379,10 @@ public class ServerList extends Activity{
 				
 		        if (serverListArrayList != null){ 
 		 	       for ( int i = 0; i < serverListArrayList.size(); i++){
-		 	        	
-		 	        	
-		 		        	Button button_connect_to = new Button(mContext);
-		 					button_connect_to.setPadding(5, 5, 5, 5);
-		 		         	button_connect_to.setText(serverListArrayList.get(i).getServerName());
-		 		         	button_connect_to.setId(i);
-								//custom look of button
-					   		button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.buttontheme_btn_default_holo_light));
-					   			//enabling menu item menu_item_edit_server and menu_item_delete_server
-					   		invalidateOptionsMenu();
 
-		 		         	final Intent intent_start_ConnectToServer = new Intent(getApplicationContext(), ConnectToServer.class);
-		 					intent_start_ConnectToServer.putExtra("server_name", serverListArrayList.get(i).getServerName());
-		 					intent_start_ConnectToServer.putExtra("IP_address", serverListArrayList.get(i).getIPAddress());
-		 					intent_start_ConnectToServer.putExtra("username", serverListArrayList.get(i).getUsername());
-		 					intent_start_ConnectToServer.putExtra("password", serverListArrayList.get(i).getPassword());	
-		 					
-		 		         	button_connect_to.setOnClickListener(new OnClickListener() {
-		 						
-		 						@Override
-		 						public void onClick(View v) {
-		 							
-		 							startActivity(intent_start_ConnectToServer);
-		 								 			     	        
-		 						}
-		 					});
-		 		         	ll.addView(button_connect_to);
+					   createConnectButtons(i);
 		 	        	
-		 	        }
+		 	       }
 		         }
 			} catch (WrongPasswordException e) {
 				// TODO Auto-generated catch block
@@ -420,36 +395,13 @@ public class ServerList extends Activity{
       		try {
 				serverListArrayList = aXMLReaderWriter.decryptFileWithXMLAndParseItToServerList(appPasswordcharArray);
 				
-		        if (serverListArrayList != null){ 
+		        if (serverListArrayList != null){
 		 	       for ( int i = 0; i < serverListArrayList.size(); i++){
-		 	        	
-		 	        	
-		 		        	final Button button_connect_to = new Button(mContext);
-		 					button_connect_to.setPadding(5, 5, 5, 5);
-		 		         	button_connect_to.setText(serverListArrayList.get(i).getServerName());
-		 		         	button_connect_to.setId(i);
-						   		//custom look of button
-						  	button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.buttontheme_btn_default_holo_light));
-					   			//enabling menu item menu_item_edit_server and menu_item_delete_server
-					   		invalidateOptionsMenu();
 
-		 		         	button_connect_to.setOnClickListener(new OnClickListener() {
-		 						
-		 						@Override
-		 						public void onClick(View v) {
-		 								
-		 							Bundle bundleWithClickedButtonID = new Bundle();
-	 								bundleWithClickedButtonID.putInt("clicked_button", button_connect_to.getId());
-	 								Log.v(TAG, "button_connect_to.getId():" + button_connect_to.getId());
-		 							showDialog(DIALOG_GIVE_ME_A_SERVER_PASSWORD, bundleWithClickedButtonID);
-		 							
-		 			     	        
-		 						}
-		 					});
-		 		         	ll.addView(button_connect_to);
-		 	        	
-		 	        }
-		         }
+		 	        	createConnectButtonsThatAskForServerPassword(i);
+
+				   }
+				}
 				
 			} catch (WrongPasswordException e) {
 				Toast.makeText(getApplicationContext(), R.string.wrong_app_password_exeption, Toast.LENGTH_SHORT).show();
@@ -460,63 +412,7 @@ public class ServerList extends Activity{
 
       	
     }
-    
-    /**
-     * Klasa pomocnicza służąca do zapamiętywania czy okna dialogowe dialog_FIRST_TIME_RUNING i dialog_GIVE_ME_A_APP_PASSWORD tworzone w onCreate są wyświetlane na ekranie. Klasa StateHolder wraz z metodami
-     * onRetainNonConfigurationInstance, onCreate, showdialog_FIRST_TIME_RUNING, dismissdialog_FIRST_TIME_RUNING, showdialog_GIVE_ME_A_APP_PASSWORD, dismissdialog_GIVE_ME_A_APP_PASSWORD, onPause i onResume 
-     * poprawnie zarządza wyświetlaniem okien dialogowych dialog_FIRST_TIME_RUNING i dialog_GIVE_ME_A_APP_PASSWORD w czasie restartu aktywności wywołanego zmianą konfiguracji urządzenia z czym nie radziły 
-     * sobie standardowe mechanizmy systemu Android.
-     * 
-     * @author sokar
-     *
-     */
-    private static class StateHolder {
-	    boolean mIsShowingDialog_FIRST_TIME_RUNING;
-	   	boolean mIsShowingDialog_GIVE_ME_A_PASSWORD;
-	    public StateHolder() {
-	    	mIsShowingDialog_FIRST_TIME_RUNING = false;
-	    	mIsShowingDialog_GIVE_ME_A_PASSWORD = false;
-	    }
-    }
-    
-	/**
-	 * Wywołuje metodę <code>showDialog(DIALOG_FIRST_TIME_RUNING)</code> i zmienia wartość pola {@link mStateHolder.mIsShowingDialog_FIRST_TIME_RUNING} na <code>true</code>.
-	 * @see android.app.Activity#showDialog(int)
-	 */
-	private void showdialog_FIRST_TIME_RUNING(){
-    	mStateHolder.mIsShowingDialog_FIRST_TIME_RUNING = true;
-    	showDialog(DIALOG_FIRST_TIME_RUNING);
-    }
-	
-    /**
-     * Wywołuje metodę <code>dialog_FIRST_TIME_RUNING.dismiss()</code> i zmienia wartość pola {@link mStateHolder.mIsShowingDialog_FIRST_TIME_RUNING} na <code>false</code>. 
-     * @see android.app.Dialog#dismiss()
-     */
-    private void dismissdialog_FIRST_TIME_RUNING(){
-    	mStateHolder.mIsShowingDialog_FIRST_TIME_RUNING = false;
-    	dialog_FIRST_TIME_RUNING.dismiss();
-    }
-    
-    /**
-     * Wywołuje metodę <code>showDialog(DIALOG_GIVE_ME_A_APP_PASSWORD)</code> i zmienia wartość pola {@link mStateHolder.mIsShowingDialog_GIVE_ME_A_PASSWORD} na <code>true</code>.
-     * @see android.app.Activity#showDialog(int)
-     */
-    private void showdialog_GIVE_ME_A_APP_PASSWORD() {
-        mStateHolder.mIsShowingDialog_GIVE_ME_A_PASSWORD = true;
-        showDialog(DIALOG_GIVE_ME_A_APP_PASSWORD);
-    }
 
-    /**
-     * Wywołuje metodę <code>removeDialog(DIALOG_GIVE_ME_A_APP_PASSWORD)</code> i zmienia wartość pola {@link mStateHolder.mIsShowingDialog_GIVE_ME_A_PASSWORD} na <code>false</code>. 
-     * @see android.app.Activity#removeDialog(int);
-     */
-    private void dismissdialog_GIVE_ME_A_APP_PASSWORD(){
-    	mStateHolder.mIsShowingDialog_GIVE_ME_A_PASSWORD = false;
-    	//dialog_GIVE_ME_A_APP_PASSWORD.dismiss();
-    	removeDialog(DIALOG_GIVE_ME_A_APP_PASSWORD);
-    }
-    
-    
     /**
      * Metoda wywoływana przez system Android przed zniszczeniem aktywności, służy do zapamiętywania stanu aktywności. Tu do usuwania okien dialogowych z ekranu gdy aplikacja ma nie zapamiętywać hasła w sesji. 
      * @see android.app.Activity#onSaveInstanceState(android.os.Bundle)
@@ -720,34 +616,10 @@ public class ServerList extends Activity{
 				        }
 					    if (serverListArrayList != null){ 
 					 	       for ( int i = 0; i < serverListArrayList.size(); i++){
+
+								   createConnectButtons(i);
 					 	        	
-					 	        	
-					 		        	Button button_connect_to = new Button(mContext);
-					 					button_connect_to.setPadding(5, 5, 5, 5);
-					 		         	button_connect_to.setText(serverListArrayList.get(i).getServerName());
-					 		         	button_connect_to.setId(i);
-									    	//custom look of button
-									    button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.buttontheme_btn_default_holo_light));
-								   			//enabling menu item menu_item_edit_server and menu_item_delete_server
-								   		invalidateOptionsMenu();
-					 		         	final Intent intent_start_ConnectToServer = new Intent(getApplicationContext(), ConnectToServer.class);
-					 					intent_start_ConnectToServer.putExtra("server_name", serverListArrayList.get(i).getServerName());
-					 					intent_start_ConnectToServer.putExtra("IP_address", serverListArrayList.get(i).getIPAddress());
-					 					intent_start_ConnectToServer.putExtra("username", serverListArrayList.get(i).getUsername());
-					 					intent_start_ConnectToServer.putExtra("password", serverListArrayList.get(i).getPassword());	
-					 					
-					 					
-					 		         	button_connect_to.setOnClickListener(new OnClickListener() {
-					 						
-					 						@Override
-					 						public void onClick(View v) {
-					 							
-					 			     	        startActivity(intent_start_ConnectToServer);
-					 						}
-					 					});
-					 		         	ll.addView(button_connect_to);
-					 	        	
-					 	        }
+					 	       }
 					    }
 					    dismissdialog_FIRST_TIME_RUNING();
 				    }
@@ -794,35 +666,10 @@ public class ServerList extends Activity{
 							
 					        if (serverListArrayList != null){ 
 					 	       for ( int i = 0; i < serverListArrayList.size(); i++){
-					 	        	
-					 	        	
-					 		        	Button button_connect_to = new Button(mContext);
-					 					button_connect_to.setPadding(5, 5, 5, 5);
-					 		         	button_connect_to.setText(serverListArrayList.get(i).getServerName());
-					 		         	button_connect_to.setId(i);
-									   		 //custom look of button
-									    button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.buttontheme_btn_default_holo_light));
-								   			//enabling menu item menu_item_edit_server and menu_item_delete_server
-								   		invalidateOptionsMenu();
 
-					 		         	final Intent intent_start_ConnectToServer = new Intent(getApplicationContext(), ConnectToServer.class);
-					 					intent_start_ConnectToServer.putExtra("server_name", serverListArrayList.get(i).getServerName());
-					 					intent_start_ConnectToServer.putExtra("IP_address", serverListArrayList.get(i).getIPAddress());
-					 					intent_start_ConnectToServer.putExtra("username", serverListArrayList.get(i).getUsername());
-					 					intent_start_ConnectToServer.putExtra("password", serverListArrayList.get(i).getPassword());	
-					 					
-					 					
-					 		         	button_connect_to.setOnClickListener(new OnClickListener() {
-					 						
-					 						@Override
-					 						public void onClick(View v) {
-					 							
-					 			     	        startActivity(intent_start_ConnectToServer);
-					 						}
-					 					});
-					 		         	ll.addView(button_connect_to);
+								   createConnectButtons(i);
 					 	        	
-					 	        }
+					 	       }
 					         }
 					        final CheckBox remember_app_password_in_sesion_CheckBox = (CheckBox) dialog_GIVE_ME_A_APP_PASSWORD.findViewById(R.id.remember_app_password_in_sesion_CheckBox);
 		     	        	if (remember_app_password_in_sesion_CheckBox.isChecked() == true){
@@ -1713,4 +1560,113 @@ public class ServerList extends Activity{
 	  */
 	   return true;
    }
+
+	/**
+	 * Klasa pomocnicza służąca do zapamiętywania czy okna dialogowe dialog_FIRST_TIME_RUNING i dialog_GIVE_ME_A_APP_PASSWORD tworzone w onCreate są wyświetlane na ekranie. Klasa StateHolder wraz z metodami
+	 * onRetainNonConfigurationInstance, onCreate, showdialog_FIRST_TIME_RUNING, dismissdialog_FIRST_TIME_RUNING, showdialog_GIVE_ME_A_APP_PASSWORD, dismissdialog_GIVE_ME_A_APP_PASSWORD, onPause i onResume
+	 * poprawnie zarządza wyświetlaniem okien dialogowych dialog_FIRST_TIME_RUNING i dialog_GIVE_ME_A_APP_PASSWORD w czasie restartu aktywności wywołanego zmianą konfiguracji urządzenia z czym nie radziły
+	 * sobie standardowe mechanizmy systemu Android.
+	 *
+	 * @author sokar
+	 *
+	 */
+	private static class StateHolder {
+		boolean mIsShowingDialog_FIRST_TIME_RUNING;
+		boolean mIsShowingDialog_GIVE_ME_A_PASSWORD;
+		public StateHolder() {
+			mIsShowingDialog_FIRST_TIME_RUNING = false;
+			mIsShowingDialog_GIVE_ME_A_PASSWORD = false;
+		}
+	}
+
+	private void createConnectButtons(int i){
+		Button button_connect_to = new Button(ServerList.this);
+		button_connect_to.setPadding(5, 5, 5, 5);
+		button_connect_to.setText(serverListArrayList.get(i).getServerName());
+		button_connect_to.setId(i);
+		//custom look of button
+		button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.buttontheme_btn_default_holo_light));
+		//enabling menu item menu_item_edit_server and menu_item_delete_server
+		invalidateOptionsMenu();
+
+		final Intent intent_start_ConnectToServer = new Intent(getApplicationContext(), ConnectToServer.class);
+		intent_start_ConnectToServer.putExtra("server_name", serverListArrayList.get(i).getServerName());
+		intent_start_ConnectToServer.putExtra("IP_address", serverListArrayList.get(i).getIPAddress());
+		intent_start_ConnectToServer.putExtra("username", serverListArrayList.get(i).getUsername());
+		intent_start_ConnectToServer.putExtra("password", serverListArrayList.get(i).getPassword());
+
+		button_connect_to.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+
+				startActivity(intent_start_ConnectToServer);
+
+			}
+		});
+		ll.addView(button_connect_to);
+	}
+
+	private void createConnectButtonsThatAskForServerPassword(int i){
+		final Button button_connect_to = new Button(ServerList.this);
+		button_connect_to.setPadding(5, 5, 5, 5);
+		button_connect_to.setText(serverListArrayList.get(i).getServerName());
+		button_connect_to.setId(i);
+		//custom look of button
+		button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.buttontheme_btn_default_holo_light));
+		//enabling menu item menu_item_edit_server and menu_item_delete_server
+		invalidateOptionsMenu();
+
+		button_connect_to.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+
+				Bundle bundleWithClickedButtonID = new Bundle();
+				bundleWithClickedButtonID.putInt("clicked_button", button_connect_to.getId());
+				Log.v(TAG, "button_connect_to.getId():" + button_connect_to.getId());
+				showDialog(DIALOG_GIVE_ME_A_SERVER_PASSWORD, bundleWithClickedButtonID);
+
+
+			}
+		});
+		ll.addView(button_connect_to);
+	}
+
+	/**
+	 * Wywołuje metodę <code>showDialog(DIALOG_FIRST_TIME_RUNING)</code> i zmienia wartość pola {@link mStateHolder.mIsShowingDialog_FIRST_TIME_RUNING} na <code>true</code>.
+	 * @see android.app.Activity#showDialog(int)
+	 */
+	private void showdialog_FIRST_TIME_RUNING(){
+		mStateHolder.mIsShowingDialog_FIRST_TIME_RUNING = true;
+		showDialog(DIALOG_FIRST_TIME_RUNING);
+	}
+
+	/**
+	 * Wywołuje metodę <code>dialog_FIRST_TIME_RUNING.dismiss()</code> i zmienia wartość pola {@link mStateHolder.mIsShowingDialog_FIRST_TIME_RUNING} na <code>false</code>.
+	 * @see android.app.Dialog#dismiss()
+	 */
+	private void dismissdialog_FIRST_TIME_RUNING(){
+		mStateHolder.mIsShowingDialog_FIRST_TIME_RUNING = false;
+		dialog_FIRST_TIME_RUNING.dismiss();
+	}
+
+	/**
+	 * Wywołuje metodę <code>showDialog(DIALOG_GIVE_ME_A_APP_PASSWORD)</code> i zmienia wartość pola {@link mStateHolder.mIsShowingDialog_GIVE_ME_A_PASSWORD} na <code>true</code>.
+	 * @see android.app.Activity#showDialog(int)
+	 */
+	private void showdialog_GIVE_ME_A_APP_PASSWORD() {
+		mStateHolder.mIsShowingDialog_GIVE_ME_A_PASSWORD = true;
+		showDialog(DIALOG_GIVE_ME_A_APP_PASSWORD);
+	}
+
+	/**
+	 * Wywołuje metodę <code>removeDialog(DIALOG_GIVE_ME_A_APP_PASSWORD)</code> i zmienia wartość pola {@link mStateHolder.mIsShowingDialog_GIVE_ME_A_PASSWORD} na <code>false</code>.
+	 * @see android.app.Activity#removeDialog(int);
+	 */
+	private void dismissdialog_GIVE_ME_A_APP_PASSWORD(){
+		mStateHolder.mIsShowingDialog_GIVE_ME_A_PASSWORD = false;
+		//dialog_GIVE_ME_A_APP_PASSWORD.dismiss();
+		removeDialog(DIALOG_GIVE_ME_A_APP_PASSWORD);
+	}
 }

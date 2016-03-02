@@ -4,67 +4,72 @@
     android:versionCode="9"
     android:versionName="0.1.2.5">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
-    <uses-permission android:name="android.permission.DISABLE_KEYGUARD"/>
-
-    <application android:icon="@drawable/ic_launcher" android:label="@string/app_name" android:theme="@android:style/Theme.Holo">
-
+    <application
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@android:style/Theme.Holo">
         <activity
-            android:name="com.mplayer_remote.ServerList"
+            android:name=".ServerList"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
-            android:name="com.mplayer_remote.SettingsForAPP"
-            android:parentActivityName="com.mplayer_remote.ServerList">
+            android:name=".SettingsForAPP"
+            android:parentActivityName=".ServerList">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mplayer_remote.ServerList"/>
+                android:value="com.mplayer_remote.ServerList" />
         </activity>
-
         <activity
-            android:name="com.mplayer_remote.ConnectToServer"
-            android:parentActivityName="com.mplayer_remote.ServerList">
+            android:name=".ConnectToServer"
+            android:parentActivityName=".ServerList">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mplayer_remote.ServerList"/>
+                android:value="com.mplayer_remote.ServerList" />
         </activity>
-
         <activity
-            android:name="com.mplayer_remote.FileChooser"
-            android:parentActivityName="com.mplayer_remote.ServerList">
+            android:name=".FileChooser"
+            android:parentActivityName=".ServerList">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mplayer_remote.ServerList"/>
+                android:value="com.mplayer_remote.ServerList" />
         </activity>
 
-        <service android:name="ServicePlayAFile"></service>
+        <service
+            android:name=".ServicePlayAFile"
+            android:exported="false" />
 
         <activity
-            android:name="com.mplayer_remote.RemoteControl"
-            android:parentActivityName="com.mplayer_remote.FileChooser"
-            android:launchMode="singleTop">
+            android:name=".RemoteControl"
+            android:launchMode="singleTop"
+            android:parentActivityName=".FileChooser">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mplayer_remote.FileChooser"/>
+                android:value="com.mplayer_remote.FileChooser" />
         </activity>
-
         <activity
-            android:name="com.mplayer_remote.SubtitleFileChooser"
-            android:parentActivityName="com.mplayer_remote.RemoteControl">
+            android:name=".SubtitleFileChooser"
+            android:parentActivityName=".RemoteControl">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mplayer_remote.RemoteControl"/>
+                android:value="com.mplayer_remote.RemoteControl" />
         </activity>
 
+        <service
+            android:name=".ConnectAndPlayService"
+            android:enabled="true"
+            android:exported="false"></service>
     </application>
+
 </manifest>
