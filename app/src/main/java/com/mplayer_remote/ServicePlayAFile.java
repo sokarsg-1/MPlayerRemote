@@ -137,7 +137,7 @@ public class ServicePlayAFile extends IntentService{
 
 			ConnectToServer.sendCommandAndSaveOutputToLockedArrayList("export DISPLAY=:0.0 && mplayer -fs -slave -quiet -input file=fifofile " + "\"" + fileToPlayString + "\"", mplayerOutputArrayList, mplayerOutputArrayListLock, newMplayerOutputCondition);
 
-			RemoteControl.RemoteControlActivityObject.finish();
+			//RemoteControl.RemoteControlActivityObject.finish();
 
 			//ConnectToServer.sendCommand("rm fifofile");
 

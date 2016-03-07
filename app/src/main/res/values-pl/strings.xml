@@ -66,4 +66,6 @@
     <string name="text_for_toast_nothing_to_play">Brak plików do odtworzenia</string>
     
     <string name="text_for_first_line_of_notification_from_serviceplayafile">MPlayer odtwarza:</string>
+
+    <string name="text_for_toast_end_of_playlist">Koniec listy odtwarzania</string>
 </resources>

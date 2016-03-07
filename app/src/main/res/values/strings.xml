@@ -67,4 +67,6 @@
     <string name="text_for_toast_nothing_to_play">Nothing to play</string>
 	
     <string name="text_for_first_line_of_notification_from_serviceplayafile">Now playing:</string>
+
+    <string name="text_for_toast_end_of_playlist">End of playlist</string>
 </resources>

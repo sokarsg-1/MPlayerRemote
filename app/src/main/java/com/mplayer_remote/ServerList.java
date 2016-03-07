@@ -1578,7 +1578,7 @@ public class ServerList extends Activity{
 			mIsShowingDialog_GIVE_ME_A_PASSWORD = false;
 		}
 	}
-
+	/*
 	private void createConnectButtons(int i){
 		Button button_connect_to = new Button(ServerList.this);
 		button_connect_to.setPadding(5, 5, 5, 5);
@@ -1608,6 +1608,61 @@ public class ServerList extends Activity{
 	}
 
 	private void createConnectButtonsThatAskForServerPassword(int i){
+		final Button button_connect_to = new Button(ServerList.this);
+		button_connect_to.setPadding(5, 5, 5, 5);
+		button_connect_to.setText(serverListArrayList.get(i).getServerName());
+		button_connect_to.setId(i);
+		//custom look of button
+		button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.buttontheme_btn_default_holo_light));
+		//enabling menu item menu_item_edit_server and menu_item_delete_server
+		invalidateOptionsMenu();
+
+		button_connect_to.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+
+				Bundle bundleWithClickedButtonID = new Bundle();
+				bundleWithClickedButtonID.putInt("clicked_button", button_connect_to.getId());
+				Log.v(TAG, "button_connect_to.getId():" + button_connect_to.getId());
+				showDialog(DIALOG_GIVE_ME_A_SERVER_PASSWORD, bundleWithClickedButtonID);
+
+
+			}
+		});
+		ll.addView(button_connect_to);
+	}
+	*/
+
+	private void createConnectButtons(int i){
+		Button button_connect_to = new Button(ServerList.this);
+		button_connect_to.setPadding(5, 5, 5, 5);
+		button_connect_to.setText(serverListArrayList.get(i).getServerName());
+		button_connect_to.setId(i);
+		//custom look of button
+		button_connect_to.setBackgroundDrawable(getResources().getDrawable(R.drawable.buttontheme_btn_default_holo_light));
+		//enabling menu item menu_item_edit_server and menu_item_delete_server
+		invalidateOptionsMenu();
+
+		final Intent intent_start_ConnectAndPlayService = new Intent(getApplicationContext(), ConnectAndPlayService.class);
+		intent_start_ConnectAndPlayService.putExtra("server_name", serverListArrayList.get(i).getServerName());
+		intent_start_ConnectAndPlayService.putExtra("IP_address", serverListArrayList.get(i).getIPAddress());
+		intent_start_ConnectAndPlayService.putExtra("username", serverListArrayList.get(i).getUsername());
+		intent_start_ConnectAndPlayService.putExtra("password", serverListArrayList.get(i).getPassword());
+
+		button_connect_to.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+
+				startService(intent_start_ConnectAndPlayService);
+
+			}
+		});
+		ll.addView(button_connect_to);
+	}
+
+	private void createConnectButtonsThatAskForServerPassword(int i){ //TODO Correct DIALOG_GIVE_ME_A_SERVER_PASSWORD
 		final Button button_connect_to = new Button(ServerList.this);
 		button_connect_to.setPadding(5, 5, 5, 5);
 		button_connect_to.setText(serverListArrayList.get(i).getServerName());

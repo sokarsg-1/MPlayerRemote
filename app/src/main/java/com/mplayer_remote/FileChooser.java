@@ -26,11 +26,14 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.app.ListActivity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -141,9 +144,34 @@ public class FileChooser extends ListActivity{
 	private static final int DIALOG_PLAY_A_FILES = 1;
 
 	private static final String FILENAME = "userSelectedMediaFileExtensions";	//Filename for checkedFileExtensionsSharedPreferences XML file.
-	ArrayList<String> defaultAllKnowMediaFileExtensionsArrayList;   //From KnowMediaFileExtensions.xml
-	boolean[] checkedFileExtensionbooleanarray;     //Where we track the selected items
-	SharedPreferences checkedFileExtensionsSharedPreferences;   //Where are saved selected by user file extensions
+	private ArrayList<String> defaultAllKnowMediaFileExtensionsArrayList;   //From KnowMediaFileExtensions.xml
+	private boolean[] checkedFileExtensionbooleanarray;     //Where we track the selected items
+	private SharedPreferences checkedFileExtensionsSharedPreferences;   //Where are saved selected by user file extensions
+
+	private ConnectAndPlayService mConnectAndPlayService;
+	private boolean mBound = false;
+
+	/** Defines callbacks for service binding, passed to bindService() */
+	private ServiceConnection mConnection = new ServiceConnection() {
+
+		@Override
+		public void onServiceConnected(ComponentName className,
+									   IBinder service) {
+			// We've bound to ConnectAndPlayService, cast the IBinder and get ConnectAndPlayService instance
+			ConnectAndPlayService.LocalBinder binder = (ConnectAndPlayService.LocalBinder) service;
+			mConnectAndPlayService = binder.getService();
+			mBound = true;
+
+			createUI();
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName arg0) {
+			mBound = false;
+		}
+	};
+
+	Bundle mSavedInstanceState;	// for createUI
 
 
 	public String getfile_to_play(){
@@ -153,6 +181,8 @@ public class FileChooser extends ListActivity{
 	public String getabsolute_path(){
 		return absolute_path;
 	}
+
+
 	/**
 	 * Metoda wywoływana przez system Android przy starcie aktywności, która na podstawie danych zwróconych przez serwer tworzy GUI zawierające listę plików i folderów zawartych w katalogu domowym użytkownika.
      * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -165,43 +195,52 @@ public class FileChooser extends ListActivity{
 		Intent intentFromstartActivity = getIntent(); //getIntent() zwraca obiekt Intent który wystartował Activity
 		absolute_path = intentFromstartActivity.getStringExtra("absolute_path");
 		file_to_play = intentFromstartActivity.getStringExtra("file_to_play");
+		mSavedInstanceState = savedInstanceState;
 
-        if (absolute_path == null && savedInstanceState == null) { // FileChooser started from ConnectToServer
+
+    }
+
+	private void createUI(){
+
+		if (absolute_path == null && mSavedInstanceState == null) { // FileChooser started from ConnectToServer
 
 			//sendCommandAndSaveOutputToArrayList("ls -p | grep -v /");
-			ConnectToServer.sendCommandAndSaveOutputToArrayList("echo $HOME", dir_contain);
+			if (mBound) {
+
+				mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("echo $HOME", dir_contain);
+			}
 			absolute_path = dir_contain.get(0);
 			dir_contain = new ArrayList<String>();//erasing
 			dir_contain.add("..");
 
-			ConnectToServer.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path + "/" + "'", dir_contain);
-			ConnectToServer.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep -v /", only_file_from_absolute_path);
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path + "/" + "'", dir_contain);
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep -v /", only_file_from_absolute_path);
 
 			for (int i = 0; i < dir_contain.size(); i++) {
 				Log.v(TAG, dir_contain.get(i));
 			}
 
-		}else if (savedInstanceState != null){ //FileChooser is being restarted by for example screen rotation
+		}else if (mSavedInstanceState != null){ //FileChooser is being restarted by for example screen rotation
 
-			absolute_path = savedInstanceState.getString("absolute_path");
-			file_to_play = savedInstanceState.getString("file_to_play");
-			fileS_to_palyArrayList = savedInstanceState.getStringArrayList("fileS_to_palyArrayList");
-			only_file_from_absolute_path_of_long_pressed_dir = savedInstanceState.getStringArrayList("only_file_from_absolute_path_of_long_pressed_dir");
-			absolute_path_of_long_pressed_dir = savedInstanceState.getString("absolute_path_of_long_pressed_dir");
+			absolute_path = mSavedInstanceState.getString("absolute_path");
+			file_to_play = mSavedInstanceState.getString("file_to_play");
+			fileS_to_palyArrayList = mSavedInstanceState.getStringArrayList("fileS_to_palyArrayList");
+			only_file_from_absolute_path_of_long_pressed_dir = mSavedInstanceState.getStringArrayList("only_file_from_absolute_path_of_long_pressed_dir");
+			absolute_path_of_long_pressed_dir = mSavedInstanceState.getString("absolute_path_of_long_pressed_dir");
 
 			dir_contain = new ArrayList<String>();//erasing
 			dir_contain.add("..");
 
-			ConnectToServer.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path + "/" + "'",dir_contain);
-			ConnectToServer.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep -v /",only_file_from_absolute_path);
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path + "/" + "'",dir_contain);
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep -v /",only_file_from_absolute_path);
 
 		}else if (absolute_path != null ){ //FileChooser started by back button from RemoteControl (notyfication TaskStackBuilder)
 
 			dir_contain = new ArrayList<String>();//erasing
 			dir_contain.add("..");
 
-			ConnectToServer.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path + "/" + "'",dir_contain);
-			ConnectToServer.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep -v /",only_file_from_absolute_path);
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path + "/" + "'",dir_contain);
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep -v /",only_file_from_absolute_path);
 
 		}
 
@@ -217,9 +256,9 @@ public class FileChooser extends ListActivity{
 		}
 
 		//GUI
-        	//getting ListView from ListActivity
+		//getting ListView from ListActivity
 		lV = getListView();
-			// LongClickListener to lV
+		// LongClickListener to lV
 		lV.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> av, View v, int pos, long id) {
@@ -230,9 +269,7 @@ public class FileChooser extends ListActivity{
 		setListAdapter(new MyBaseAdapter(dir_contain, only_file_from_absolute_path));
 		lV.setTextFilterEnabled(true);
 
-
-		
-    }
+	}
 
 	/**
 	 * Metoda wywoływana przez system Android przed zniszczeniem aktywności, służy do zapamiętywania stanu aktywności, tu konkretnie miejsca w drzewie katalogów serwera, które jest aktualnie wyświetlane przez GUI.
@@ -261,38 +298,43 @@ public class FileChooser extends ListActivity{
 		string_from_selected_view_in_ListView = dir_contain.get(position);		//name of file or dir that was choose by user
 		
 		only_file_from_absolute_path = new ArrayList<String>();
-		ConnectToServer.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep -v /", only_file_from_absolute_path);
+		mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep -v /", only_file_from_absolute_path);
 		if (only_file_from_absolute_path.indexOf(string_from_selected_view_in_ListView) != -1){
 
 			file_to_play = absolute_path + "/" + string_from_selected_view_in_ListView;
 			Log.v(TAG,"file_to_play to: " + file_to_play);
 			Log.v(TAG,"absolute_path to: " + absolute_path);
 			
-			if (isMyServiceRunning() == false){
+			//if (isMyServiceRunning() == false){
+				if(mBound == true) {
+					mConnectAndPlayService.playAFile(file_to_play);
+				}
+				/*
 				Intent intent_start_ServicePlayAFile = new Intent(getApplicationContext(), ServicePlayAFile.class);
 				intent_start_ServicePlayAFile.putExtra("file_to_play", file_to_play);
 				intent_start_ServicePlayAFile.putExtra("absolute_path", absolute_path);
 				startService(intent_start_ServicePlayAFile);
 				Log.v(TAG, "startuje ServicePlayAFile z plikiem " + file_to_play);
+				*/
 				/*
 				Intent intent_start_RemoteControl = new Intent(getApplicationContext(), RemoteControl.class);
 				intent_start_RemoteControl.putExtra("file_to_play", file_to_play);
 				intent_start_RemoteControl.putExtra("absolute_path", absolute_path);
 				startActivity(intent_start_RemoteControl);
 				*/
-			}else{
-				showDialogPlayAFileDialogFragment();
-			}
+			//}else{
+				//showDialogPlayAFileDialogFragment();
+			//}
 
-		}else if(ConnectToServer.sendCommandAndWaitForExitStatus("cd " + "'" + absolute_path + "/" + string_from_selected_view_in_ListView + "/" + "'") == 0){
+		}else if(mConnectAndPlayService.sendCommandAndWaitForExitStatus("cd " + "'" + absolute_path + "/" + string_from_selected_view_in_ListView + "/" + "'") == 0){
 
 			absolute_path = absolute_path + "/" + string_from_selected_view_in_ListView;
 			Log.v(TAG,"obecne absolute_path to: " + absolute_path);
 			dir_contain = new ArrayList<String>();
 			dir_contain.add("..");
-			ConnectToServer.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path + "/" + "'", dir_contain);
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path + "/" + "'", dir_contain);
 			only_file_from_absolute_path = new ArrayList<String>();
-			ConnectToServer.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep -v /",only_file_from_absolute_path);
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep -v /",only_file_from_absolute_path);
 
 				//removing files with unknown file extensions from dir_contain and only_file_from_absolute_path.
 			if (showOnlyMediaTypeFilesBoolean == true) {
@@ -323,38 +365,43 @@ public class FileChooser extends ListActivity{
 
 
 		only_file_from_absolute_path_of_long_pressed_dir = new ArrayList<String>();
-		ConnectToServer.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep -v /", only_file_from_absolute_path_of_long_pressed_dir);
+		mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep -v /", only_file_from_absolute_path_of_long_pressed_dir);
 		if (only_file_from_absolute_path_of_long_pressed_dir.indexOf(string_from_long_pressed_view_in_ListView) != -1){		//long press will behave like normal click on file.
 
 			file_to_play = absolute_path + "/" + string_from_long_pressed_view_in_ListView;
 			Log.v(TAG,"file_to_play to: " + file_to_play);
 			Log.v(TAG,"absolute_path to: " + absolute_path);
 
-			if (isMyServiceRunning() == false){
+			//if (isMyServiceRunning() == false){
+				if(mBound == true) {
+					mConnectAndPlayService.playAFile(file_to_play);
+				}
+				/*
 				Intent intent_start_ServicePlayAFile = new Intent(getApplicationContext(), ServicePlayAFile.class);
 				intent_start_ServicePlayAFile.putExtra("file_to_play", file_to_play);
 				intent_start_ServicePlayAFile.putExtra("absolute_path", absolute_path);
 				startService(intent_start_ServicePlayAFile);
 				Log.v(TAG, "startuje ServicePlayAFile z plikiem " + file_to_play);
+				*/
 				/*
 				Intent intent_start_RemoteControl = new Intent(getApplicationContext(), RemoteControl.class);
 				intent_start_RemoteControl.putExtra("file_to_play", file_to_play);
 				intent_start_RemoteControl.putExtra("absolute_path", absolute_path);
 				startActivity(intent_start_RemoteControl);
 				*/
-			}else{
-				showDialogPlayAFileDialogFragment();
-			}
+			//}else{
+				//showDialogPlayAFileDialogFragment();
+			//}
 
 
-		}else if(ConnectToServer.sendCommandAndWaitForExitStatus("cd " + "'" + absolute_path + "/" + string_from_long_pressed_view_in_ListView + "/" + "'") == 0){	//long press on directory
+		}else if(mConnectAndPlayService.sendCommandAndWaitForExitStatus("cd " + "'" + absolute_path + "/" + string_from_long_pressed_view_in_ListView + "/" + "'") == 0){	//long press on directory
 
 			only_file_from_absolute_path_of_long_pressed_dir = new ArrayList<String>();
 
 			absolute_path_of_long_pressed_dir = absolute_path + "/" + string_from_long_pressed_view_in_ListView;
 			Log.v(TAG, "absolute_path_of_long_pressed_dir to: " + absolute_path_of_long_pressed_dir);
-			ConnectToServer.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path_of_long_pressed_dir + "/" + "'", long_pressed_dir_contain);
-			ConnectToServer.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_of_long_pressed_dir + "/" + "'" + "| grep -v /", only_file_from_absolute_path_of_long_pressed_dir);
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path_of_long_pressed_dir + "/" + "'", long_pressed_dir_contain);
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_of_long_pressed_dir + "/" + "'" + "| grep -v /", only_file_from_absolute_path_of_long_pressed_dir);
 
 				//removing files with unknown file extensions from long_pressed_dir_contain and only_file_from_absolute_path_of_long_pressed_dir.
 			long_pressed_dir_contain = removeUnknownFileType(long_pressed_dir_contain, absolute_path_of_long_pressed_dir);
@@ -369,7 +416,11 @@ public class FileChooser extends ListActivity{
 						fileS_to_palyArrayList.add(i, absolute_path_of_long_pressed_dir + "/" + only_file_from_absolute_path_of_long_pressed_dir.get(i));
 					}
 
-					if (isMyServiceRunning() == false) {
+					//if (isMyServiceRunning() == false) {
+						if(mBound == true){
+							mConnectAndPlayService.playAFiles(fileS_to_palyArrayList);
+						}
+						/*
 						for (int i = 0; i < fileS_to_palyArrayList.size(); i++) {
 							Intent intent_start_ServicePlayAFile = new Intent(getApplicationContext(), ServicePlayAFile.class);
 							intent_start_ServicePlayAFile.putExtra("file_to_play", fileS_to_palyArrayList.get(i));
@@ -377,9 +428,10 @@ public class FileChooser extends ListActivity{
 							startService(intent_start_ServicePlayAFile);
 							Log.v(TAG, "startuje ServicePlayAFile z plikiem " + fileS_to_palyArrayList.get(i));
 						}
-					} else {
-						showDialogPlayAFileSDialogFragment();
-					}
+						*/
+					//} else {
+						//showDialogPlayAFileSDialogFragment();
+					//}
 					//Log.v(TAG, "pliki z długo klikniętego katalogu: " + fileS_to_paly);
 
 				/*
@@ -396,12 +448,31 @@ public class FileChooser extends ListActivity{
 		return true;
 	}
 
+	@Override
+	protected void onStart() {
+		super.onStart();
+		// Bind to ConnectAndPlayService
+		Intent intent = new Intent(this, ConnectAndPlayService.class);
+		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		// Unbind from the service
+		if (mBound) {
+			unbindService(mConnection);
+			mBound = false;
+		}
+	}
+
 
     /*
     @Override
     public void onResume(){
     	super.onResume();
-    	//connectToServer(server_name, IP_address, username, password);
+    	//mConnectAndPlayService(server_name, IP_address, username, password);
     	sharedPreferencesForActivityFileChooser = getSharedPreferences("sharedPreferencesForActivityFileChooser", 0);
     	file_to_play = sharedPreferencesForActivityFileChooser.getString("file_to_play", "none");
     	Log.v("TAG", "file_to_play in onResume:" +  file_to_play );	
@@ -467,7 +538,7 @@ public class FileChooser extends ListActivity{
     private boolean isMyServiceRunning() {
         ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if ("com.mplayer_remote.ServicePlayAFile".equals(service.service.getClassName())) {
+            if ("com.mplayer_remote.ConnectAndPlayService".equals(service.service.getClassName())) {
                 return true;
             }
         }
@@ -489,7 +560,7 @@ public class FileChooser extends ListActivity{
 
 		ArrayList<String> only_dir_from_absolute_path_with_slash = new ArrayList<String>();
 		ArrayList<String> only_dir_from_absolute_path = new ArrayList<String>();
-		ConnectToServer.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep /",only_dir_from_absolute_path_with_slash);
+		mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep /",only_dir_from_absolute_path_with_slash);
 		for (int i = 0; i < only_dir_from_absolute_path_with_slash.size(); i++){
 			only_dir_from_absolute_path.add(i, only_dir_from_absolute_path_with_slash.get(i).substring(0, only_dir_from_absolute_path_with_slash.get(i).length() - 1));
 			//Log.v(TAG, "only_dir_from_absolute_path without / from removeUnknownFileType: " + only_dir_from_absolute_path.get(i));

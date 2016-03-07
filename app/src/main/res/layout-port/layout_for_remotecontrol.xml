@@ -48,6 +48,14 @@
                 android:layout_alignTop="@+id/pause_button"
                 android:layout_alignParentLeft="true" />
 
+            <Button
+                android:background="@drawable/previous_media_button"
+                android:id="@+id/previous_media_button"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:layout_above="@id/step_10_second_backward_button"
+                android:layout_alignParentLeft="true"/>
+
             <SeekBar
                 android:id="@+id/seekBar"
                 android:layout_width="fill_parent"
