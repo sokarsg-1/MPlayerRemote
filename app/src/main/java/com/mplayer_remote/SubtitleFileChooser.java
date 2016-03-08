@@ -25,9 +25,12 @@ import java.util.ArrayList;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.ListActivity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -79,6 +82,31 @@ public class SubtitleFileChooser extends ListActivity{
 	 * Nazwa ostatnio wskazanego pliku lub folderu wyświetlana przez GUI aktywności jako jeden z elementów <code>ListView</code>. 
 	 */	
 	private String string_from_selected_view_in_ListView = "";
+
+	private ConnectAndPlayService mConnectAndPlayService;
+	private boolean mBound = false;
+
+	/** Defines callbacks for service binding, passed to bindService() */
+	private ServiceConnection mConnection = new ServiceConnection() {
+
+		@Override
+		public void onServiceConnected(ComponentName className,
+									   IBinder service) {
+			// We've bound to ConnectAndPlayService, cast the IBinder and get ConnectAndPlayService instance
+			ConnectAndPlayService.LocalBinder binder = (ConnectAndPlayService.LocalBinder) service;
+			mConnectAndPlayService = binder.getService();
+			mBound = true;
+
+			createUI();
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName arg0) {
+			mBound = false;
+		}
+	};
+
+	Bundle mSavedInstanceState;	// for createUI
 	
 	
 	/** 
@@ -91,48 +119,71 @@ public class SubtitleFileChooser extends ListActivity{
         super.onCreate(savedInstanceState);
 		getActionBar().setDisplayHomeAsUpEnabled(false);
 
+		mSavedInstanceState = savedInstanceState;
 
-		if (savedInstanceState == null){
-	        Intent intent_from_RemoteControl = getIntent(); //getIntent() zwraca obiekt Intent który wystartował Activity
+    }
+
+	private void createUI(){
+		if (mSavedInstanceState == null){
+			Intent intent_from_RemoteControl = getIntent(); //getIntent() zwraca obiekt Intent który wystartował Activity
 			absolute_path = intent_from_RemoteControl.getStringExtra("absolute_path");
 			file_to_play = intent_from_RemoteControl.getStringExtra("file_to_play");
 
-	        absolute_path_to_subtitle = intent_from_RemoteControl.getStringExtra("absolute_path");
-	        
-	        Log.v(TAG, "Przekazany w intent absolute_path_to_subtitle = " + absolute_path_to_subtitle);
-	      	      
-	        dir_contain = new ArrayList<String>();//erasing
-	        dir_contain.add("..");
-	        ConnectToServer.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path_to_subtitle + "/" + "'",dir_contain);
-	        ConnectToServer.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_to_subtitle + "/" + "'" + "| grep -v /",only_file_from_absolute_path);
-	        		
+			absolute_path_to_subtitle = intent_from_RemoteControl.getStringExtra("absolute_path");
+
+			Log.v(TAG, "Przekazany w intent absolute_path_to_subtitle = " + absolute_path_to_subtitle);
+
+			dir_contain = new ArrayList<String>();//erasing
+			dir_contain.add("..");
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path_to_subtitle + "/" + "'",dir_contain);
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_to_subtitle + "/" + "'" + "| grep -v /",only_file_from_absolute_path);
+
 			for (int i = 0; i < dir_contain.size(); i++){
 				Log.v(TAG, dir_contain.get(i));
 			}
-			
-        }else{
-			absolute_path = savedInstanceState.getString("absolute_path");
-			file_to_play = savedInstanceState.getString("file_to_play");
-        	absolute_path_to_subtitle = savedInstanceState.getString("absolute_path_to_subtitle");
-        	subtitle_to_load = savedInstanceState.getString("subtitle_to_load");
-        	Log.v(TAG,"absolute_path_to_subtitle from savedInstanceState: " + absolute_path_to_subtitle);
-        	
-	        dir_contain = new ArrayList<String>();//erasing
-	        dir_contain.add("..");
-	        ConnectToServer.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path_to_subtitle + "/" + "'",dir_contain);
-	        ConnectToServer.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_to_subtitle + "/" + "'" + "| grep -v /",only_file_from_absolute_path);
-	        		
+
+		}else{
+			absolute_path = mSavedInstanceState.getString("absolute_path");
+			file_to_play = mSavedInstanceState.getString("file_to_play");
+			absolute_path_to_subtitle = mSavedInstanceState.getString("absolute_path_to_subtitle");
+			subtitle_to_load = mSavedInstanceState.getString("subtitle_to_load");
+			Log.v(TAG,"absolute_path_to_subtitle from savedInstanceState: " + absolute_path_to_subtitle);
+
+			dir_contain = new ArrayList<String>();//erasing
+			dir_contain.add("..");
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path_to_subtitle + "/" + "'",dir_contain);
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_to_subtitle + "/" + "'" + "| grep -v /",only_file_from_absolute_path);
+
 			for (int i = 0; i < dir_contain.size(); i++){
 				Log.v(TAG, dir_contain.get(i));
 			}
-        }
-        
-			// ustawianie GUI
+		}
+
+		// ustawianie GUI
 		setListAdapter(new MyBaseAdapter(dir_contain, only_file_from_absolute_path));
 		ListView lv = getListView();
 		lv.setTextFilterEnabled(true);
-		
-    }
+
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		// Bind to ConnectAndPlayService
+		Intent intent = new Intent(this, ConnectAndPlayService.class);
+		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		// Unbind from the service
+		if (mBound) {
+			unbindService(mConnection);
+			mBound = false;
+		}
+	}
 
     /**
      * Metoda wywoływana kiedy użytkownik wybierze dowolną pozycje z listy wyświetlanej przez aktywność. 
@@ -148,7 +199,7 @@ public class SubtitleFileChooser extends ListActivity{
 		string_from_selected_view_in_ListView = dir_contain.get(position);		///name of file or dir that was choose by user
 		
 		only_file_from_absolute_path = new ArrayList<String>();
-		ConnectToServer.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_to_subtitle + "/" + "'" + "| grep -v /",only_file_from_absolute_path);
+		mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_to_subtitle + "/" + "'" + "| grep -v /", only_file_from_absolute_path);
 		if  (only_file_from_absolute_path.indexOf(string_from_selected_view_in_ListView) != -1){
 			subtitle_to_load = absolute_path_to_subtitle + "/" + string_from_selected_view_in_ListView;
 			Log.v(TAG,"subtitle to load: " + subtitle_to_load);
@@ -157,32 +208,33 @@ public class SubtitleFileChooser extends ListActivity{
 			if (isMyServiceRunning() == true){
 				String subtitleFilePathWithBackslash = subtitle_to_load.replace(" ", "\\ ");		//mplayer do not understand bash quoting, so space must be replaced by backslash space characters
 				Log.v(TAG, "path containing backslash space instead space to file  with subtitle: " + subtitleFilePathWithBackslash);
-				ConnectToServer.sendCommandAndWaitForExitStatus("echo pausing_keep sub_remove > fifofile");
-				ConnectToServer.sendCommandAndWaitForExitStatus("echo pausing_keep sub_load " + "'" + subtitleFilePathWithBackslash + "'" + " > fifofile");
-				ConnectToServer.sendCommandAndWaitForExitStatus("echo pausing_keep sub_file > fifofile");
+				mConnectAndPlayService.sendCommandAndWaitForExitStatus("echo pausing_keep sub_remove > fifofile");
+				mConnectAndPlayService.sendCommandAndWaitForExitStatus("echo pausing_keep sub_load " + "'" + subtitleFilePathWithBackslash + "'" + " > fifofile");
+				mConnectAndPlayService.sendCommandAndWaitForExitStatus("echo pausing_keep sub_file > fifofile");
 				Intent intent_start_RemoteControl = new Intent(getApplicationContext(), RemoteControl.class);
 				intent_start_RemoteControl.putExtra("absolute_path", absolute_path);
 				intent_start_RemoteControl.putExtra("file_to_play", file_to_play);
+				//intent_start_RemoteControl.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 				startActivity(intent_start_RemoteControl);
 				this.finish();
 			}else{
 				this.finish();
     		}
-		}else if (ConnectToServer.sendCommandAndWaitForExitStatus("cd " + "'" + absolute_path_to_subtitle + "/" + string_from_selected_view_in_ListView + "/" + "'") == 0){
+		}else if (mConnectAndPlayService.sendCommandAndWaitForExitStatus("cd " + "'" + absolute_path_to_subtitle + "/" + string_from_selected_view_in_ListView + "/" + "'") == 0){
 			absolute_path_to_subtitle = absolute_path_to_subtitle + "/" + string_from_selected_view_in_ListView;
 			Log.v(TAG,"obecne absolute_path_to_subtitle to: " + absolute_path_to_subtitle);
 			dir_contain = new ArrayList<String>();
 			dir_contain.add("..");
-			ConnectToServer.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path_to_subtitle + "/" + "'", dir_contain);
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path_to_subtitle + "/" + "'", dir_contain);
 			only_file_from_absolute_path = new ArrayList<String>();
-			ConnectToServer.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_to_subtitle + "/" + "'" + "| grep -v /",only_file_from_absolute_path);
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_to_subtitle + "/" + "'" + "| grep -v /",only_file_from_absolute_path);
 			setListAdapter(new MyBaseAdapter(dir_contain, only_file_from_absolute_path));
 		}else{
 			Toast.makeText(getApplicationContext(), R.string.text_for_toast_you_do_not_have_rights_to_open_this_directory, Toast.LENGTH_SHORT).show();
 		}
 		
 	}
-    
+
     /**
      * Sprawdza czy usługa ServicePlayAFile działa w tle.
      * @return <code>true</code> jeśli usługa ServicePlayAFile działa w tle, <code>false</code> w przeciwnym wypadku.
@@ -190,7 +242,7 @@ public class SubtitleFileChooser extends ListActivity{
     private boolean isMyServiceRunning() {
         ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
         for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if ("com.mplayer_remote.ServicePlayAFile".equals(service.service.getClassName())) {
+            if ("com.mplayer_remote.ConnectAndPlayService".equals(service.service.getClassName())) {
                 return true;
             }
         }

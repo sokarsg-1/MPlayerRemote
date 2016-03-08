@@ -7,6 +7,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
@@ -30,6 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -79,12 +81,18 @@ public class ConnectAndPlayService extends Service {
     /**
      * SingleThreadExecutor for playing multiple file(in thread) one by one.
      */
-    private ExecutorService es;
+    private ExecutorService es = Executors.newSingleThreadExecutor();;
 
     /**
      * Now playing file in mplayer;
      */
     private String nowPlayingFileString;
+
+    /**
+     * Łańcuch znaków zawierający ścieżkę absolutną, w której znajduje się plik wskazany przez użytkownika do odtworzenia w programie MPlayer.
+     */
+    private String absolutePathString;
+
     /**
      * A playList from FileChooser
      */
@@ -93,7 +101,7 @@ public class ConnectAndPlayService extends Service {
      * NotificationManager
      */
     private NotificationManager mNotificationManager;
-    private int mId;		//for notyfication
+    private int mId = 1;		//for notyfication
     /**
      * Default constructor.
      */
@@ -103,16 +111,26 @@ public class ConnectAndPlayService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {      //TODO place somewhere stopSelf()
 
-        String serverNameString = intent.getStringExtra("server_name");
-        String iPAddressString = intent.getStringExtra("IP_address");
-        String usernameString = intent.getStringExtra("username");
-        char[] serverPasswordchararray = intent.getCharArrayExtra("password");
-        String serverPasswordString = new String(serverPasswordchararray);
+        String commandFormNotyficationActionReceiverString = intent.getStringExtra("command");
+        if (commandFormNotyficationActionReceiverString != null){   //intent form notyfication buttons
+            if (commandFormNotyficationActionReceiverString.equals("previous")){
+                this.playPreviousMedia();
+            }else if(commandFormNotyficationActionReceiverString.equals("pause")){
+                this.sendCommand("echo pausing_keep pause > fifofile");
+            }else if(commandFormNotyficationActionReceiverString.equals("next")){
+                this.playNextMedia();
+            }
+        }else { //started by click on SSH server button in ServerList activity
+            String serverNameString = intent.getStringExtra("server_name");
+            String iPAddressString = intent.getStringExtra("IP_address");
+            String usernameString = intent.getStringExtra("username");
+            char[] serverPasswordchararray = intent.getCharArrayExtra("password");
+            String serverPasswordString = new String(serverPasswordchararray);
 
-        Log.v(TAG, "Server data form intent: " + serverNameString + iPAddressString + usernameString + serverPasswordString);
+            Log.v(TAG, "Server data form intent: " + serverNameString + iPAddressString + usernameString + serverPasswordString);
 
-        new ConnectToAsyncTask().execute(serverNameString, iPAddressString, usernameString, serverPasswordString);
-
+            new ConnectToAsyncTask().execute(serverNameString, iPAddressString, usernameString, serverPasswordString);
+        }
         return START_STICKY;
     }
 
@@ -120,6 +138,8 @@ public class ConnectAndPlayService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.v(TAG, "ConnectAndPlayService destroyed");
+
+
     }
 
     @Override
@@ -137,11 +157,11 @@ public class ConnectAndPlayService extends Service {
      * Play a user selected media file.
      * @param fileToPlayString user selected media file.
      */
-    public void playAFile(String fileToPlayString){
+    public void playAFile(String fileToPlayString, String absolutePathString){
 
         List<String> localPlaylist = new ArrayList<String>();
         localPlaylist.add(fileToPlayString);
-        playAFiles(localPlaylist);
+        playAFiles(localPlaylist, absolutePathString);
 
     }
 
@@ -149,7 +169,7 @@ public class ConnectAndPlayService extends Service {
      * Play a user selected files one by one.
      * @param filesToPlayArrayList selected by user files.
      */
-    public void playAFiles (List<String>  filesToPlayArrayList){
+    public void playAFiles (List<String>  filesToPlayArrayList, final String absolutePathString){
         playListArrayList = filesToPlayArrayList;
 
 
@@ -158,7 +178,6 @@ public class ConnectAndPlayService extends Service {
             sendCommand("mkfifo fifofile");
         }
 
-        es = Executors.newSingleThreadExecutor();
         ArrayList<Runnable> myRunnablesArrayList = new ArrayList<Runnable>(filesToPlayArrayList.size());
         for(final String file : filesToPlayArrayList){
             Runnable r = new Runnable() {
@@ -168,7 +187,7 @@ public class ConnectAndPlayService extends Service {
                     showNotyfications(nowPlayingFileString);
                     Intent intent_start_RemoteControl = new Intent(getApplicationContext(), RemoteControl.class);
                     intent_start_RemoteControl.putExtra("file_to_play", file);
-                    //intent_start_RemoteControl.putExtra("absolute_path", absolutePathString);
+                    intent_start_RemoteControl.putExtra("absolute_path", absolutePathString);
                     intent_start_RemoteControl.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     //intent_start_RemoteControl.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
                     startActivity(intent_start_RemoteControl);
@@ -201,13 +220,16 @@ public class ConnectAndPlayService extends Service {
                 @Override
                 public void run() {
                     nowPlayingFileString = file;
+
                     showNotyfications(nowPlayingFileString);
+                    /*
                     Intent intent_start_RemoteControl = new Intent(getApplicationContext(), RemoteControl.class);
                     intent_start_RemoteControl.putExtra("file_to_play", file);
                     //intent_start_RemoteControl.putExtra("absolute_path", absolutePathString);
                     intent_start_RemoteControl.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     //intent_start_RemoteControl.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
                     startActivity(intent_start_RemoteControl);
+                    */
                     sendCommandAndSaveOutputToLockedArrayList("export DISPLAY=:0.0 && mplayer -fs -slave -quiet -input file=fifofile " + "\"" + file + "\"", mplayerOutputArrayList, mplayerOutputArrayListLock, newMplayerOutputCondition);
                 }
             };
@@ -226,6 +248,8 @@ public class ConnectAndPlayService extends Service {
         sendCommand("echo stop > fifofile");
         es.shutdownNow();
         sendCommand("rm fifofile");
+        stopForeground(true);
+
     }
 
     /**
@@ -238,7 +262,7 @@ public class ConnectAndPlayService extends Service {
         if (nowPlayingFileintIndex + 1 == playListArrayList.size()){
             Toast.makeText(getApplicationContext(), R.string.text_for_toast_end_of_playlist, Toast.LENGTH_LONG).show();
         }else {
-            stopPlaying();
+            stopPlayingPlayList();
             localPlaylist = playListArrayList.subList(nowPlayingFileintIndex + 1, playListArrayList.size());
             playASubPlayList(localPlaylist);
         }
@@ -253,10 +277,31 @@ public class ConnectAndPlayService extends Service {
         if (nowPlayingFileintIndex == 0){
             Toast.makeText(getApplicationContext(), R.string.text_for_toast_end_of_playlist, Toast.LENGTH_LONG).show();
         }else {
-            stopPlaying();
+            stopPlayingPlayList();
             localPlaylist = playListArrayList.subList(nowPlayingFileintIndex - 1, playListArrayList.size());
             playASubPlayList(localPlaylist);
         }
+    }
+
+    /**
+     * For using in playNextMedia() and playPreviousMedia()
+     */
+    private void stopPlayingPlayList(){
+        sendCommand("echo stop > fifofile");
+        es.shutdownNow();
+        sendCommand("rm fifofile");
+    }
+
+    /**
+     * Return a name of now played file.
+     */
+    public String getNowPlayingFileString(){
+        try {
+            es.awaitTermination(300, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return nowPlayingFileString;
     }
 
     /**
@@ -287,6 +332,7 @@ public class ConnectAndPlayService extends Service {
         Intent resultIntent = new Intent(this, RemoteControl.class);
         resultIntent.putExtra("file_to_play", fileToPlayString);
         //resultIntent.putExtra("absolute_path", absolutePathString);
+        resultIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 
         // The stack builder object will contain an artificial back stack for the
         // started Activity.
@@ -302,23 +348,41 @@ public class ConnectAndPlayService extends Service {
         for( int i = 0; i < stackBuilder.getIntentCount(); i++ ){
             Intent intentToEdit = stackBuilder.editIntentAt(i);
             intentToEdit.putExtra("file_to_play", fileToPlayString);
-            //intentToEdit.putExtra("absolute_path", absolutePathString);
+            intentToEdit.putExtra("absolute_path", absolutePathString);
         }
 
         PendingIntent resultPendingIntent =	stackBuilder.getPendingIntent(0,PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Intent previousMediaIntent = new Intent(this, NotyficationActionReceiver.class);
+        previousMediaIntent.setAction("previous");      //http://stackoverflow.com/questions/15350998/determine-addaction-click-for-android-notifications
+        PendingIntent previousMediaPendingIntent = PendingIntent.getBroadcast(this, 0, previousMediaIntent, PendingIntent.FLAG_UPDATE_CURRENT );
+
+        Intent pauseMediaIntent = new Intent(this, NotyficationActionReceiver.class);
+        pauseMediaIntent.setAction("pause");
+        PendingIntent pauseMediaPendingIntent = PendingIntent.getBroadcast(this, 0, pauseMediaIntent, PendingIntent.FLAG_UPDATE_CURRENT );
+
+        Intent nextMediaIntent = new Intent(this, NotyficationActionReceiver.class);
+        nextMediaIntent.setAction("next");
+        PendingIntent nextMediaPendingIntent = PendingIntent.getBroadcast(this, 0, nextMediaIntent, PendingIntent.FLAG_UPDATE_CURRENT );
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_launcher)
                         .setContentTitle(getString(R.string.text_for_first_line_of_notification_from_serviceplayafile))
-                        .setContentText(secondLineOfNotification);
+                        .setContentText(secondLineOfNotification)
+                        .addAction(R.drawable.previous_media_button, "", previousMediaPendingIntent)
+                        .addAction(R.drawable.pause_button, "", pauseMediaPendingIntent)
+                        .addAction(R.drawable.next_media_button, "", nextMediaPendingIntent)
+                        .setPriority(NotificationCompat.PRIORITY_MAX);  //for shownig notyfication on top and displaying action buttons
 
         mBuilder.setContentIntent(resultPendingIntent);
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         // mId allows you to update the notification later on.
         mNotificationManager.notify(mId, mBuilder.build());
+        startForeground(mId, mBuilder.build());
 
     };
+
 
 
 

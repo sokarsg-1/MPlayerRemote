@@ -834,11 +834,12 @@ public class ServerList extends Activity{
 	     				int id_of_clicked_button = retrievedBundle.getInt("clicked_button");
 	     				Log.v(TAG, "id of clicked button: " + id_of_clicked_button);
 	     				Intent intent_start_ConnectToServer = new Intent(getApplicationContext(), ConnectToServer.class);
-	 					intent_start_ConnectToServer.putExtra("server_name", serverListArrayList.get(id_of_clicked_button).getServerName());
-	 					intent_start_ConnectToServer.putExtra("IP_address", serverListArrayList.get(id_of_clicked_button).getIPAddress());
-	 					intent_start_ConnectToServer.putExtra("username", serverListArrayList.get(id_of_clicked_button).getUsername());
-	 					intent_start_ConnectToServer.putExtra("password", server_password);
-	     				startActivity(intent_start_ConnectToServer);
+						final Intent intent_start_ConnectAndPlayService = new Intent(getApplicationContext(), ConnectAndPlayService.class);
+						intent_start_ConnectAndPlayService.putExtra("server_name", id_of_clicked_button);
+						intent_start_ConnectAndPlayService.putExtra("IP_address", id_of_clicked_button);
+						intent_start_ConnectAndPlayService.putExtra("username", id_of_clicked_button);
+						intent_start_ConnectAndPlayService.putExtra("password", server_password);
+	     				startService(intent_start_ConnectAndPlayService);
 	     				removeDialog(DIALOG_GIVE_ME_A_SERVER_PASSWORD);
 	     				Arrays.fill(server_password, '0');
 				    }	

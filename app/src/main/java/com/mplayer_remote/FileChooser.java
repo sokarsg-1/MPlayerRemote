@@ -200,6 +200,15 @@ public class FileChooser extends ListActivity{
 
     }
 
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+
+		mConnectAndPlayService.stopPlaying();
+		Intent intent_start_ConnectAndPlayService = new Intent(getApplicationContext(), ConnectAndPlayService.class);
+		stopService(intent_start_ConnectAndPlayService);
+	}
+
 	private void createUI(){
 
 		if (absolute_path == null && mSavedInstanceState == null) { // FileChooser started from ConnectToServer
@@ -307,7 +316,7 @@ public class FileChooser extends ListActivity{
 			
 			//if (isMyServiceRunning() == false){
 				if(mBound == true) {
-					mConnectAndPlayService.playAFile(file_to_play);
+					mConnectAndPlayService.playAFile(file_to_play, absolute_path);
 				}
 				/*
 				Intent intent_start_ServicePlayAFile = new Intent(getApplicationContext(), ServicePlayAFile.class);
@@ -374,7 +383,7 @@ public class FileChooser extends ListActivity{
 
 			//if (isMyServiceRunning() == false){
 				if(mBound == true) {
-					mConnectAndPlayService.playAFile(file_to_play);
+					mConnectAndPlayService.playAFile(file_to_play, absolute_path);
 				}
 				/*
 				Intent intent_start_ServicePlayAFile = new Intent(getApplicationContext(), ServicePlayAFile.class);
@@ -418,7 +427,7 @@ public class FileChooser extends ListActivity{
 
 					//if (isMyServiceRunning() == false) {
 						if(mBound == true){
-							mConnectAndPlayService.playAFiles(fileS_to_palyArrayList);
+							mConnectAndPlayService.playAFiles(fileS_to_palyArrayList, absolute_path);
 						}
 						/*
 						for (int i = 0; i < fileS_to_palyArrayList.size(); i++) {

@@ -72,7 +72,7 @@ public class RemoteControl extends Activity{
 	/**
 	 * Łańcuch znaków zawierający ścieżkę absolutną, w której znajduje się plik wskazany przez użytkownika.
 	 */
-	//private String absolutePathString;
+	private String absolutePathString;
 	
 	/**
 	 * Łańcuch znaków zawierający pełna nazwę wraz ze ścieżką absolutną do pliku wskazanego przez użytkownika. 
@@ -229,7 +229,7 @@ public class RemoteControl extends Activity{
 		 //RemoteControlActivityObject = this;
 
 		 Intent intentFromstartActivity = getIntent(); //getIntent() zwraca obiekt Intent który wystartował Activity
-		 //absolutePathString = intentFromstartActivity.getStringExtra("absolute_path");
+		 absolutePathString = intentFromstartActivity.getStringExtra("absolute_path");
 		 fileToPlayString = intentFromstartActivity.getStringExtra("file_to_play");
 	     //Log.v(TAG, "absolute_path przekazane przez intent z ServicePlayAFile: " + absolutePathString);
 	     Log.v(TAG, "file_to_play przekazane przez intent z ConnectAndPlayService: " + fileToPlayString);
@@ -280,6 +280,7 @@ public class RemoteControl extends Activity{
 				if(mBound == true){
 					mConnectAndPlayService.playPreviousMedia();
 					mVibrator.vibrate(50);
+					updatenowPlayFileNameTextView();
 				}
 			}
 		});
@@ -296,6 +297,7 @@ public class RemoteControl extends Activity{
 					//ConnectToServer.sendCommand("rm fifofile");
 					//RemoteControlActivityObject.finish();
 					mVibrator.vibrate(50);
+					updatenowPlayFileNameTextView();
 				}
 
 			}
@@ -454,7 +456,7 @@ public class RemoteControl extends Activity{
 		}; 
 	}
 	
-
+	/*
 	@Override
 	protected void onNewIntent(Intent intent) {		//this will be called when activity RemoteControl is started true ServicePlayAFile when user touch a notification or when ServicePlayAFile start to handle new Intent
 		// TODO Auto-generated method stub
@@ -473,7 +475,7 @@ public class RemoteControl extends Activity{
 			nowPlayFileNameTextView.setText(substringfileToPlayString);
 		}
 	}
-
+	*/
 
 
 	@Override
@@ -482,6 +484,9 @@ public class RemoteControl extends Activity{
 		// Bind to ConnectAndPlayService
 		Intent intent = new Intent(this, ConnectAndPlayService.class);
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
+		//geting now playing file name from SharedPreferences
+		updatenowPlayFileNameTextView();
 	}
 
 	@Override
@@ -592,7 +597,7 @@ public class RemoteControl extends Activity{
 	    switch (item.getItemId()) {
 	    case R.id.menu_item_load_subtitle:
 	    	Intent intentStartSubtitleFileChooser = new Intent(getApplicationContext(), SubtitleFileChooser.class);
-	    	//intentStartSubtitleFileChooser.putExtra("absolute_path", absolutePathString);
+	    	intentStartSubtitleFileChooser.putExtra("absolute_path", absolutePathString);
 			intentStartSubtitleFileChooser.putExtra("file_to_play", fileToPlayString);
 	    	//Log.v(TAG, "Starting SubtitleFileChooser with absolute_path = " + absolutePathString);
 			Log.v(TAG, "Starting SubtitleFileChooser with file_to_play = " + fileToPlayString);
@@ -636,6 +641,21 @@ public class RemoteControl extends Activity{
 		return false; //otherwise the system can handle it        
 	}
 
+	/**
+	 * Update nowPlayFileNameTextView to new file name from nowPlayingFileSharedPreferences.
+	 */
+	private void updatenowPlayFileNameTextView(){
+
+		if(mBound == true){
+			fileToPlayString = mConnectAndPlayService.getNowPlayingFileString();
+		}
+		if (fileToPlayString != null) {
+			nowPlayFileNameTextView = (TextView) findViewById(R.id.now_play_textView);
+			int positionOfLastDashint = fileToPlayString.lastIndexOf("/");
+			String substringfileToPlayString = fileToPlayString.substring(positionOfLastDashint + 1);
+			nowPlayFileNameTextView.setText(substringfileToPlayString);
+		}
+	}
 
 	/**
 	 * Sprawdza czy usługa ConnectAndPlayService działa w tle.
