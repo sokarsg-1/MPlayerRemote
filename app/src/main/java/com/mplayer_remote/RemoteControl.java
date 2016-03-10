@@ -23,9 +23,11 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.app.KeyguardManager;
 import android.app.KeyguardManager.KeyguardLock;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -33,6 +35,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Vibrator;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -215,6 +218,23 @@ public class RemoteControl extends Activity{
 			mBound = false;
 		}
 	};
+
+	// Our handler for received Intents. This will be called whenever an Intent
+	// with an action named "custom-event-name" is broadcasted.
+	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// Get extra data included in the Intent
+			String newnowPlayingFileString = intent.getStringExtra("NewnowPlayingFileString");
+			Log.d("receiver", "Got message: " + newnowPlayingFileString);
+
+			fileToPlayString = newnowPlayingFileString;
+			nowPlayFileNameTextView = (TextView) findViewById(R.id.now_play_textView);
+			int positionOfLastDashint = fileToPlayString.lastIndexOf("/");
+			String substringfileToPlayString = fileToPlayString.substring(positionOfLastDashint + 1);
+			nowPlayFileNameTextView.setText(substringfileToPlayString);
+		}
+	};
 	
 	/**Metoda wywoływana przez system Android przy starcie aktywności.
 	 * Wczytuje definicje GUI z pliku XML. Definiuje akcje wywoływane poprzez interakcji użytkownika z graficznym interfejsem użytkownika aktywności.
@@ -229,10 +249,11 @@ public class RemoteControl extends Activity{
 		 //RemoteControlActivityObject = this;
 
 		 Intent intentFromstartActivity = getIntent(); //getIntent() zwraca obiekt Intent który wystartował Activity
-		 absolutePathString = intentFromstartActivity.getStringExtra("absolute_path");
 		 fileToPlayString = intentFromstartActivity.getStringExtra("file_to_play");
-	     //Log.v(TAG, "absolute_path przekazane przez intent z ServicePlayAFile: " + absolutePathString);
-	     Log.v(TAG, "file_to_play przekazane przez intent z ConnectAndPlayService: " + fileToPlayString);
+		 absolutePathString = intentFromstartActivity.getStringExtra("absolute_path");
+		 Log.v(TAG, "file_to_play przekazane przez intent z ConnectAndPlayService: " + fileToPlayString);
+		 Log.v(TAG, "absolute_path przekazane przez intent z ServicePlayAFile: " + absolutePathString);
+
 	     
 	     	//gui
 	     setContentView(R.layout.layout_for_remotecontrol);
@@ -268,6 +289,7 @@ public class RemoteControl extends Activity{
 					//stopService(new Intent(getApplicationContext(), com.mplayer_remote.ServicePlayAFile.class));
 					finish();
 					mVibrator.vibrate(50);
+					onBackPressed();
 				}
 				
 			}
@@ -280,7 +302,7 @@ public class RemoteControl extends Activity{
 				if(mBound == true){
 					mConnectAndPlayService.playPreviousMedia();
 					mVibrator.vibrate(50);
-					updatenowPlayFileNameTextView();
+
 				}
 			}
 		});
@@ -297,17 +319,17 @@ public class RemoteControl extends Activity{
 					//ConnectToServer.sendCommand("rm fifofile");
 					//RemoteControlActivityObject.finish();
 					mVibrator.vibrate(50);
-					updatenowPlayFileNameTextView();
+
 				}
 
 			}
 		});
 	     
 	     pauseButton = (Button) findViewById(R.id.pause_button);
-	     
+	     /*
 	     sharedPreferencesForActivityRemotControl = getSharedPreferences("RemoteControl_activity_state", 0);
 	     showingPlayButtonboolean = sharedPreferencesForActivityRemotControl.getBoolean("showing_play_button", false);
-    	  
+    	 */
 	     pauseButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -315,6 +337,7 @@ public class RemoteControl extends Activity{
 				if( mBound == true ) {
 					mConnectAndPlayService.sendCommand("echo pausing_keep pause > fifofile");
 					mVibrator.vibrate(50);
+					/*
 					if (showingPlayButtonboolean == false) {
 						pauseButton.setBackgroundColor(000000);
 						pauseButton.setCompoundDrawablesWithIntrinsicBounds(drawable.play_button, 0, 0, 0);
@@ -324,7 +347,7 @@ public class RemoteControl extends Activity{
 						pauseButton.setCompoundDrawablesWithIntrinsicBounds(drawable.pause_button, 0, 0, 0);
 						showingPlayButtonboolean = false;
 					}
-
+					*/
 				}
 			}
 	     });
@@ -452,30 +475,10 @@ public class RemoteControl extends Activity{
 	            
 	            Log.v(TAG, "timePositionInSecondsMPlayerLikeString is : " + timePositionMPlayerLikeString);
 	            timePositionTextView.setText(timePositionMPlayerLikeString);
-	        };
+			};
 		}; 
 	}
-	
-	/*
-	@Override
-	protected void onNewIntent(Intent intent) {		//this will be called when activity RemoteControl is started true ServicePlayAFile when user touch a notification or when ServicePlayAFile start to handle new Intent
-		// TODO Auto-generated method stub
-		super.onNewIntent(intent);
-		setIntent(intent);
-		//absolutePathString = intent.getStringExtra("absolute_path");
-		//Log.v(TAG, "a onNewIntent was called and it recaive a absolute_path from ServicePlayAFile: " + absolutePathString);
 
-		//for updating nowPlayFileNameTextView when starting to play a next media form long presed directory
-		fileToPlayString = intent.getStringExtra("file_to_play");
-
-		if (fileToPlayString != null) {
-			nowPlayFileNameTextView = (TextView) findViewById(R.id.now_play_textView);
-			int positionOfLastDashint = fileToPlayString.lastIndexOf("/");
-			String substringfileToPlayString = fileToPlayString.substring(positionOfLastDashint + 1);
-			nowPlayFileNameTextView.setText(substringfileToPlayString);
-		}
-	}
-	*/
 
 
 	@Override
@@ -485,8 +488,7 @@ public class RemoteControl extends Activity{
 		Intent intent = new Intent(this, ConnectAndPlayService.class);
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
-		//geting now playing file name from SharedPreferences
-		updatenowPlayFileNameTextView();
+		LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("nowPlayingFileStringChange"));
 	}
 
 	@Override
@@ -497,6 +499,18 @@ public class RemoteControl extends Activity{
 			unbindService(mConnection);
 			mBound = false;
 		}
+
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+	}
+
+	@Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		Intent resultIntent = new Intent(this, FileChooser.class);
+		//resultIntent.putExtra("file_to_play", fileToPlayString);
+		resultIntent.putExtra("absolute_path", absolutePathString);
+		resultIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);	//redirect intent to existing FileChooser insted starting a new one in task
+		startActivity(resultIntent);
 	}
 
 	/**
@@ -526,13 +540,13 @@ public class RemoteControl extends Activity{
 	    	// Restore preferences
 	 	if (isMyServiceRunning() == false)
 	 		finish();
-	 	
+	 	/*
 	    showingPlayButtonboolean = sharedPreferencesForActivityRemotControl.getBoolean("showing_play_button", false);
    	 	if (showingPlayButtonboolean == true){
 	    	 pauseButton.setBackgroundColor(000000);
 	    	 pauseButton.setCompoundDrawablesWithIntrinsicBounds(drawable.play_button, 0, 0, 0);
 	    }
-   	 	
+   	 	*/
    	 		//wyłącza Lock Screen
    	 	lock.disableKeyguard();
 	}
@@ -552,29 +566,17 @@ public class RemoteControl extends Activity{
         readTimeLengthThread.interrupt();
         readTimePositionThread.interrupt();
         readProgressThread.interrupt();
-        
+        /*
         	//Saving preferences
         SharedPreferences.Editor editor = sharedPreferencesForActivityRemotControl.edit();
         editor.putBoolean("showing_play_button", showingPlayButtonboolean);
         editor.commit();
-        
+        */
         //absolutePathString = null;
         
         	//włącza Lock Screen
         lock.reenableKeyguard();
     }
-
-	/*
-	@Override
-	public void onBackPressed() {        //when user press a back key
-
-			ConnectToServer.sendCommand("echo stop > fifofile");
-			stopService(new Intent(getApplicationContext(), com.mplayer_remote.ServicePlayAFile.class));
-			RemoteControlActivityObject.finish();
-
-
-	}
-	*/
 
     /**
      * Metoda wywoływana przez system Android w reakcji na pierwsze wybranie przycisku menu urządzenia. Funkcja odpowiedzialna za wczytanie pliku XML z definicją menu aktywności.
@@ -641,21 +643,7 @@ public class RemoteControl extends Activity{
 		return false; //otherwise the system can handle it        
 	}
 
-	/**
-	 * Update nowPlayFileNameTextView to new file name from nowPlayingFileSharedPreferences.
-	 */
-	private void updatenowPlayFileNameTextView(){
 
-		if(mBound == true){
-			fileToPlayString = mConnectAndPlayService.getNowPlayingFileString();
-		}
-		if (fileToPlayString != null) {
-			nowPlayFileNameTextView = (TextView) findViewById(R.id.now_play_textView);
-			int positionOfLastDashint = fileToPlayString.lastIndexOf("/");
-			String substringfileToPlayString = fileToPlayString.substring(positionOfLastDashint + 1);
-			nowPlayFileNameTextView.setText(substringfileToPlayString);
-		}
-	}
 
 	/**
 	 * Sprawdza czy usługa ConnectAndPlayService działa w tle.

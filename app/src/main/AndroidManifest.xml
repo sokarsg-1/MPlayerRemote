@@ -31,14 +31,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.mplayer_remote.ServerList" />
         </activity>
-        <activity
-            android:name=".ConnectToServer"
-            android:parentActivityName=".ServerList"
-            android:enabled="false">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.mplayer_remote.ServerList" />
-        </activity>
+
         <activity
             android:name=".FileChooser"
             android:parentActivityName=".ServerList">
@@ -47,14 +40,8 @@
                 android:value="com.mplayer_remote.ServerList" />
         </activity>
 
-        <service
-            android:name=".ServicePlayAFile"
-            android:exported="false"
-            android:enabled="false"/>
-
         <activity
             android:name=".RemoteControl"
-            android:launchMode="singleTask"
             android:parentActivityName=".FileChooser">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

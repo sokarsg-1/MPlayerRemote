@@ -16,6 +16,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -81,7 +83,7 @@ public class ConnectAndPlayService extends Service {
     /**
      * SingleThreadExecutor for playing multiple file(in thread) one by one.
      */
-    private ExecutorService es = Executors.newSingleThreadExecutor();;
+    private ExecutorService es = Executors.newSingleThreadExecutor();
 
     /**
      * Now playing file in mplayer;
@@ -171,7 +173,9 @@ public class ConnectAndPlayService extends Service {
      */
     public void playAFiles (List<String>  filesToPlayArrayList, final String absolutePathString){
         playListArrayList = filesToPlayArrayList;
+        this.absolutePathString = absolutePathString;
 
+        es = Executors.newSingleThreadExecutor();
 
         while (isfifofileExist() == false){
             sendCommand("rm fifofile");
@@ -183,8 +187,9 @@ public class ConnectAndPlayService extends Service {
             Runnable r = new Runnable() {
                 @Override
                 public void run() {
+                    Log.v(TAG,"Starting playing file: " + file + " from absolutePath: " + absolutePathString);
                     nowPlayingFileString = file;
-                    showNotyfications(nowPlayingFileString);
+                    showNotyfications(file, absolutePathString);
                     Intent intent_start_RemoteControl = new Intent(getApplicationContext(), RemoteControl.class);
                     intent_start_RemoteControl.putExtra("file_to_play", file);
                     intent_start_RemoteControl.putExtra("absolute_path", absolutePathString);
@@ -206,7 +211,7 @@ public class ConnectAndPlayService extends Service {
      * Called by playNextMedia() and playPreviousMedia() to play a sublist from user selected playlist
      * @param filesToPlayArrayList sublist of filesToPlayArrayList to play.
      */
-    private void playASubPlayList (List<String>  filesToPlayArrayList){
+    private void playASubPlayList (List<String>  filesToPlayArrayList, final String absolutePathString){
 
         while (isfifofileExist() == false){
             sendCommand("rm fifofile");
@@ -220,8 +225,8 @@ public class ConnectAndPlayService extends Service {
                 @Override
                 public void run() {
                     nowPlayingFileString = file;
-
-                    showNotyfications(nowPlayingFileString);
+                    sendBroadcastnowPlayingFileStringChange();
+                    showNotyfications(file, absolutePathString);
                     /*
                     Intent intent_start_RemoteControl = new Intent(getApplicationContext(), RemoteControl.class);
                     intent_start_RemoteControl.putExtra("file_to_play", file);
@@ -264,7 +269,7 @@ public class ConnectAndPlayService extends Service {
         }else {
             stopPlayingPlayList();
             localPlaylist = playListArrayList.subList(nowPlayingFileintIndex + 1, playListArrayList.size());
-            playASubPlayList(localPlaylist);
+            playASubPlayList(localPlaylist, absolutePathString);
         }
     }
 
@@ -279,8 +284,21 @@ public class ConnectAndPlayService extends Service {
         }else {
             stopPlayingPlayList();
             localPlaylist = playListArrayList.subList(nowPlayingFileintIndex - 1, playListArrayList.size());
-            playASubPlayList(localPlaylist);
+            playASubPlayList(localPlaylist, absolutePathString);
         }
+    }
+
+    /**
+     * Return now played file.
+     */
+    public String getNowPlayingFileString(){
+        return nowPlayingFileString;
+    }
+    /**
+     * Return current absolutePathString.
+     */
+    public String getAbsolutePathString(){
+        return absolutePathString;
     }
 
     /**
@@ -293,15 +311,13 @@ public class ConnectAndPlayService extends Service {
     }
 
     /**
-     * Return a name of now played file.
+     * Notifing observers about changing of nowPlayingFileString.
      */
-    public String getNowPlayingFileString(){
-        try {
-            es.awaitTermination(300, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return nowPlayingFileString;
+    private void sendBroadcastnowPlayingFileStringChange(){
+        Intent intent = new Intent("nowPlayingFileStringChange");
+        // You can also include some extra data.
+        intent.putExtra("NewnowPlayingFileString", nowPlayingFileString);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
     /**
@@ -320,7 +336,9 @@ public class ConnectAndPlayService extends Service {
 
     }
 
-    private void showNotyfications(String fileToPlayString){
+    private void showNotyfications(String fileToPlayString, String absolutePathString){
+
+        Log.v(TAG, "In showNotyfications()  fileToPlayString: " + fileToPlayString + " absolutePathString: " + absolutePathString);
 
         int positionOfLastDot = fileToPlayString.lastIndexOf(".");
         String filenameExtension = fileToPlayString.substring(positionOfLastDot + 1);
@@ -331,8 +349,8 @@ public class ConnectAndPlayService extends Service {
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(this, RemoteControl.class);
         resultIntent.putExtra("file_to_play", fileToPlayString);
-        //resultIntent.putExtra("absolute_path", absolutePathString);
-        resultIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+        resultIntent.putExtra("absolute_path", absolutePathString);
+        //resultIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
 
         // The stack builder object will contain an artificial back stack for the
         // started Activity.
@@ -344,14 +362,17 @@ public class ConnectAndPlayService extends Service {
         // Adds the Intent that starts the Activity to the top of the stack
         stackBuilder.addNextIntent(resultIntent);
 
+        /*
         //for adding fileToPlayString and absolutePathString to intents form stackBuilder
         for( int i = 0; i < stackBuilder.getIntentCount(); i++ ){
             Intent intentToEdit = stackBuilder.editIntentAt(i);
-            intentToEdit.putExtra("file_to_play", fileToPlayString);
-            intentToEdit.putExtra("absolute_path", absolutePathString);
+            //intentToEdit.putExtra("file_to_play", fileToPlayString);
+            //intentToEdit.putExtra("absolute_path", absolutePathString);
+            //intentToEdit.setAction(absolutePathString);
         }
+        */
 
-        PendingIntent resultPendingIntent =	stackBuilder.getPendingIntent(0,PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent resultPendingIntent =	stackBuilder.getPendingIntent(0,PendingIntent.FLAG_CANCEL_CURRENT);
 
         Intent previousMediaIntent = new Intent(this, NotyficationActionReceiver.class);
         previousMediaIntent.setAction("previous");      //http://stackoverflow.com/questions/15350998/determine-addaction-click-for-android-notifications
@@ -371,7 +392,7 @@ public class ConnectAndPlayService extends Service {
                         .setContentTitle(getString(R.string.text_for_first_line_of_notification_from_serviceplayafile))
                         .setContentText(secondLineOfNotification)
                         .addAction(R.drawable.previous_media_button, "", previousMediaPendingIntent)
-                        .addAction(R.drawable.pause_button, "", pauseMediaPendingIntent)
+                        .addAction(R.drawable.play_button, "", pauseMediaPendingIntent)
                         .addAction(R.drawable.next_media_button, "", nextMediaPendingIntent)
                         .setPriority(NotificationCompat.PRIORITY_MAX);  //for shownig notyfication on top and displaying action buttons
 

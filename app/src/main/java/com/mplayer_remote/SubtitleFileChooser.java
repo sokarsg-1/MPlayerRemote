@@ -124,46 +124,47 @@ public class SubtitleFileChooser extends ListActivity{
     }
 
 	private void createUI(){
-		if (mSavedInstanceState == null){
-			Intent intent_from_RemoteControl = getIntent(); //getIntent() zwraca obiekt Intent który wystartował Activity
-			absolute_path = intent_from_RemoteControl.getStringExtra("absolute_path");
-			file_to_play = intent_from_RemoteControl.getStringExtra("file_to_play");
+		if(mBound == true) {
+			if (mSavedInstanceState == null) {
+				Intent intent_from_RemoteControl = getIntent(); //getIntent() zwraca obiekt Intent który wystartował Activity
+				absolute_path = intent_from_RemoteControl.getStringExtra("absolute_path");
+				file_to_play = intent_from_RemoteControl.getStringExtra("file_to_play");
 
-			absolute_path_to_subtitle = intent_from_RemoteControl.getStringExtra("absolute_path");
+				absolute_path_to_subtitle = intent_from_RemoteControl.getStringExtra("absolute_path");
 
-			Log.v(TAG, "Przekazany w intent absolute_path_to_subtitle = " + absolute_path_to_subtitle);
+				Log.v(TAG, "Przekazany w intent absolute_path_to_subtitle = " + absolute_path_to_subtitle);
 
-			dir_contain = new ArrayList<String>();//erasing
-			dir_contain.add("..");
-			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path_to_subtitle + "/" + "'",dir_contain);
-			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_to_subtitle + "/" + "'" + "| grep -v /",only_file_from_absolute_path);
+				dir_contain = new ArrayList<String>();//erasing
+				dir_contain.add("..");
+				mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path_to_subtitle + "/" + "'", dir_contain);
+				mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_to_subtitle + "/" + "'" + "| grep -v /", only_file_from_absolute_path);
 
-			for (int i = 0; i < dir_contain.size(); i++){
-				Log.v(TAG, dir_contain.get(i));
+				for (int i = 0; i < dir_contain.size(); i++) {
+					Log.v(TAG, dir_contain.get(i));
+				}
+
+			} else {
+				absolute_path = mSavedInstanceState.getString("absolute_path");
+				file_to_play = mSavedInstanceState.getString("file_to_play");
+				absolute_path_to_subtitle = mSavedInstanceState.getString("absolute_path_to_subtitle");
+				subtitle_to_load = mSavedInstanceState.getString("subtitle_to_load");
+				Log.v(TAG, "absolute_path_to_subtitle from savedInstanceState: " + absolute_path_to_subtitle);
+
+				dir_contain = new ArrayList<String>();//erasing
+				dir_contain.add("..");
+				mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path_to_subtitle + "/" + "'", dir_contain);
+				mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_to_subtitle + "/" + "'" + "| grep -v /", only_file_from_absolute_path);
+
+				for (int i = 0; i < dir_contain.size(); i++) {
+					Log.v(TAG, dir_contain.get(i));
+				}
 			}
 
-		}else{
-			absolute_path = mSavedInstanceState.getString("absolute_path");
-			file_to_play = mSavedInstanceState.getString("file_to_play");
-			absolute_path_to_subtitle = mSavedInstanceState.getString("absolute_path_to_subtitle");
-			subtitle_to_load = mSavedInstanceState.getString("subtitle_to_load");
-			Log.v(TAG,"absolute_path_to_subtitle from savedInstanceState: " + absolute_path_to_subtitle);
-
-			dir_contain = new ArrayList<String>();//erasing
-			dir_contain.add("..");
-			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path_to_subtitle + "/" + "'",dir_contain);
-			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_to_subtitle + "/" + "'" + "| grep -v /",only_file_from_absolute_path);
-
-			for (int i = 0; i < dir_contain.size(); i++){
-				Log.v(TAG, dir_contain.get(i));
-			}
+			// ustawianie GUI
+			setListAdapter(new MyBaseAdapter(dir_contain, only_file_from_absolute_path));
+			ListView lv = getListView();
+			lv.setTextFilterEnabled(true);
 		}
-
-		// ustawianie GUI
-		setListAdapter(new MyBaseAdapter(dir_contain, only_file_from_absolute_path));
-		ListView lv = getListView();
-		lv.setTextFilterEnabled(true);
-
 	}
 
 	@Override
@@ -195,44 +196,45 @@ public class SubtitleFileChooser extends ListActivity{
      */
     @Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		super.onListItemClick(l, v, position, id);
-		string_from_selected_view_in_ListView = dir_contain.get(position);		///name of file or dir that was choose by user
-		
-		only_file_from_absolute_path = new ArrayList<String>();
-		mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_to_subtitle + "/" + "'" + "| grep -v /", only_file_from_absolute_path);
-		if  (only_file_from_absolute_path.indexOf(string_from_selected_view_in_ListView) != -1){
-			subtitle_to_load = absolute_path_to_subtitle + "/" + string_from_selected_view_in_ListView;
-			Log.v(TAG,"subtitle to load: " + subtitle_to_load);
-			Log.v(TAG,"absolute_path_to_subtitle to: " + absolute_path_to_subtitle);
-			
-			if (isMyServiceRunning() == true){
-				String subtitleFilePathWithBackslash = subtitle_to_load.replace(" ", "\\ ");		//mplayer do not understand bash quoting, so space must be replaced by backslash space characters
-				Log.v(TAG, "path containing backslash space instead space to file  with subtitle: " + subtitleFilePathWithBackslash);
-				mConnectAndPlayService.sendCommandAndWaitForExitStatus("echo pausing_keep sub_remove > fifofile");
-				mConnectAndPlayService.sendCommandAndWaitForExitStatus("echo pausing_keep sub_load " + "'" + subtitleFilePathWithBackslash + "'" + " > fifofile");
-				mConnectAndPlayService.sendCommandAndWaitForExitStatus("echo pausing_keep sub_file > fifofile");
-				Intent intent_start_RemoteControl = new Intent(getApplicationContext(), RemoteControl.class);
-				intent_start_RemoteControl.putExtra("absolute_path", absolute_path);
-				intent_start_RemoteControl.putExtra("file_to_play", file_to_play);
-				//intent_start_RemoteControl.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-				startActivity(intent_start_RemoteControl);
-				this.finish();
-			}else{
-				this.finish();
-    		}
-		}else if (mConnectAndPlayService.sendCommandAndWaitForExitStatus("cd " + "'" + absolute_path_to_subtitle + "/" + string_from_selected_view_in_ListView + "/" + "'") == 0){
-			absolute_path_to_subtitle = absolute_path_to_subtitle + "/" + string_from_selected_view_in_ListView;
-			Log.v(TAG,"obecne absolute_path_to_subtitle to: " + absolute_path_to_subtitle);
-			dir_contain = new ArrayList<String>();
-			dir_contain.add("..");
-			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path_to_subtitle + "/" + "'", dir_contain);
+		if(mBound == true) {
+			super.onListItemClick(l, v, position, id);
+			string_from_selected_view_in_ListView = dir_contain.get(position);        ///name of file or dir that was choose by user
+
 			only_file_from_absolute_path = new ArrayList<String>();
-			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_to_subtitle + "/" + "'" + "| grep -v /",only_file_from_absolute_path);
-			setListAdapter(new MyBaseAdapter(dir_contain, only_file_from_absolute_path));
-		}else{
-			Toast.makeText(getApplicationContext(), R.string.text_for_toast_you_do_not_have_rights_to_open_this_directory, Toast.LENGTH_SHORT).show();
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_to_subtitle + "/" + "'" + "| grep -v /", only_file_from_absolute_path);
+			if (only_file_from_absolute_path.indexOf(string_from_selected_view_in_ListView) != -1) {
+				subtitle_to_load = absolute_path_to_subtitle + "/" + string_from_selected_view_in_ListView;
+				Log.v(TAG, "subtitle to load: " + subtitle_to_load);
+				Log.v(TAG, "absolute_path_to_subtitle to: " + absolute_path_to_subtitle);
+
+				if (isMyServiceRunning() == true) {
+					String subtitleFilePathWithBackslash = subtitle_to_load.replace(" ", "\\ ");        //mplayer do not understand bash quoting, so space must be replaced by backslash space characters
+					Log.v(TAG, "path containing backslash space instead space to file  with subtitle: " + subtitleFilePathWithBackslash);
+					mConnectAndPlayService.sendCommandAndWaitForExitStatus("echo pausing_keep sub_remove > fifofile");
+					mConnectAndPlayService.sendCommandAndWaitForExitStatus("echo pausing_keep sub_load " + "'" + subtitleFilePathWithBackslash + "'" + " > fifofile");
+					mConnectAndPlayService.sendCommandAndWaitForExitStatus("echo pausing_keep sub_file > fifofile");
+					Intent intent_start_RemoteControl = new Intent(getApplicationContext(), RemoteControl.class);
+					intent_start_RemoteControl.putExtra("absolute_path", absolute_path);
+					intent_start_RemoteControl.putExtra("file_to_play", file_to_play);
+					//intent_start_RemoteControl.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+					startActivity(intent_start_RemoteControl);
+					this.finish();
+				} else {
+					this.finish();
+				}
+			} else if (mConnectAndPlayService.sendCommandAndWaitForExitStatus("cd " + "'" + absolute_path_to_subtitle + "/" + string_from_selected_view_in_ListView + "/" + "'") == 0) {
+				absolute_path_to_subtitle = absolute_path_to_subtitle + "/" + string_from_selected_view_in_ListView;
+				Log.v(TAG, "obecne absolute_path_to_subtitle to: " + absolute_path_to_subtitle);
+				dir_contain = new ArrayList<String>();
+				dir_contain.add("..");
+				mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path_to_subtitle + "/" + "'", dir_contain);
+				only_file_from_absolute_path = new ArrayList<String>();
+				mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path_to_subtitle + "/" + "'" + "| grep -v /", only_file_from_absolute_path);
+				setListAdapter(new MyBaseAdapter(dir_contain, only_file_from_absolute_path));
+			} else {
+				Toast.makeText(getApplicationContext(), R.string.text_for_toast_you_do_not_have_rights_to_open_this_directory, Toast.LENGTH_SHORT).show();
+			}
 		}
-		
 	}
 
     /**

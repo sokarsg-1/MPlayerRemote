@@ -1,5 +1,6 @@
 package com.mplayer_remote;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -51,19 +52,15 @@ public class DialogPlayAFileDialogFragment extends DialogFragment {
                 //.setCancelable(false)
                 .setPositiveButton(R.string.text_for_positiveButton_from_DIALOG_PLAY_A_FILE, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        ConnectToServer.sendCommandAndWaitForExitStatus("echo stop > fifofile");
-                        getActivity().stopService(new Intent(getActivity(), com.mplayer_remote.ServicePlayAFile.class));
-                        Intent intent_start_ServicePlayAFile = new Intent(getActivity(), ServicePlayAFile.class);
-                        intent_start_ServicePlayAFile.putExtra("file_to_play", file_to_play);
-                        intent_start_ServicePlayAFile.putExtra("absolute_path", absolute_path);
-                        getActivity().startService(intent_start_ServicePlayAFile);
-                    /*
-                    Intent intent_start_RemoteControl = new Intent(getApplicationContext(), RemoteControl.class);
-                    intent_start_RemoteControl.putExtra("file_to_play", file_to_play);
-                    intent_start_RemoteControl.putExtra("absolute_path", absolute_path);
-                    startActivity(intent_start_RemoteControl);
-                    */
-                        //dialog.dismiss();
+
+                        boolean mBound = ((FileChooser)getActivity()).getmBound();
+
+                        if (mBound == true){
+                            ConnectAndPlayService mConnectAndPlayService = ((FileChooser) getActivity()).getmConnectAndPlayService();
+                            mConnectAndPlayService.stopPlaying();
+                            mConnectAndPlayService.playAFile(file_to_play, absolute_path);
+                        }
+
                     }
                 })
                 .setNegativeButton(R.string.text_for_negativeButton_from_DIALOG_PLAY_A_FILE, new DialogInterface.OnClickListener() {

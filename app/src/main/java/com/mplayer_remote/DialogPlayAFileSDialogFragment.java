@@ -87,21 +87,24 @@ public class DialogPlayAFileSDialogFragment extends DialogFragment{
                 //.setCancelable(false)
                 .setPositiveButton(R.string.text_for_positiveButton_from_DIALOG_PLAY_A_FILE, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        getActivity().stopService(new Intent(getActivity(), com.mplayer_remote.ServicePlayAFile.class));
-                        ConnectToServer.sendCommandAndWaitForExitStatus("echo stop > fifofile");
+
+                        boolean mBound = ((FileChooser)getActivity()).getmBound();
 
 
+
+                        ArrayList<String> filesToPlayArrayList = new ArrayList<String>();
                         for (int i = 0; i < only_file_from_absolute_path_of_long_pressed_dir.size(); i++) {
 
                             String file_to_play = new String();
                             file_to_play = absolute_path_of_long_pressed_dir + "/" + only_file_from_absolute_path_of_long_pressed_dir.get(i);
 
-                            Intent intent_start_ServicePlayAFile = new Intent(getActivity(), ServicePlayAFile.class);
-                            intent_start_ServicePlayAFile.putExtra("file_to_play", file_to_play);
-                            intent_start_ServicePlayAFile.putExtra("absolute_path", absolute_path_of_long_pressed_dir);
-                            getActivity().startService(intent_start_ServicePlayAFile);
-                            //Log.v(TAG, "startuje ServicePlayAFile z plikiem " + file_to_play);
+                            filesToPlayArrayList.add(file_to_play);
+                        }
 
+                        if (mBound == true){
+                            ConnectAndPlayService mConnectAndPlayService = ((FileChooser) getActivity()).getmConnectAndPlayService();
+                            mConnectAndPlayService.stopPlaying();
+                            mConnectAndPlayService.playAFiles(filesToPlayArrayList, absolute_path_of_long_pressed_dir);
                         }
                     }
                 })
