@@ -305,8 +305,8 @@ public class ConnectAndPlayService extends Service {
      * For using in playNextMedia() and playPreviousMedia()
      */
     private void stopPlayingPlayList(){
-        sendCommand("echo stop > fifofile");
         es.shutdownNow();
+        sendCommand("echo stop > fifofile");
         sendCommand("rm fifofile");
     }
 
@@ -350,7 +350,7 @@ public class ConnectAndPlayService extends Service {
         Intent resultIntent = new Intent(this, RemoteControl.class);
         resultIntent.putExtra("file_to_play", fileToPlayString);
         resultIntent.putExtra("absolute_path", absolutePathString);
-        //resultIntent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+        resultIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 
         // The stack builder object will contain an artificial back stack for the
         // started Activity.
