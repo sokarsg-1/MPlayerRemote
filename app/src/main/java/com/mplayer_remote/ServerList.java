@@ -30,13 +30,17 @@ import java.util.List;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -197,7 +201,25 @@ public class ServerList extends Activity{
 	 * Okno dialogowe z licencjami <code>dialog_LICENSE</code>. 
 	 */
 	private Dialog dialog_LICENSE;
-	
+
+	/**
+	 * Progress dialog showed when connecting to SSH server
+	 */
+	private ProgressDialog connectingToSshProgressDialog;
+
+	// Our handler for received Intents. This will be called whenever an Intent
+	// with an action named "NewnowPlayingFileString" is broadcasted.
+	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			// Get extra data included in the Intent
+			String newnowPlayingFileString = intent.getStringExtra("NewnowPlayingFileString");
+			Log.d("receiver", "Got message: " + newnowPlayingFileString);
+
+			connectingToSshProgressDialog.dismiss();
+		}
+	};
+
 	/**
 	 * Pamięta czy okna dialogowe dialog_FIRST_TIME_RUNING i dialog_GIVE_ME_A_APP_PASSWORD tworzone w onCreate są wyświetlane na ekranie. Klasa StateHolder wraz z metodami onRetainNonConfigurationInstance, onCreate,
 	 * showdialog_FIRST_TIME_RUNING, dismissdialog_FIRST_TIME_RUNING, showdialog_GIVE_ME_A_APP_PASSWORD, dismissdialog_GIVE_ME_A_APP_PASSWORD, onPause i onResume poprawnie zarządza wyświetlaniem okien dialogowych
@@ -473,9 +495,21 @@ public class ServerList extends Activity{
     		dialog_GIVE_ME_A_APP_PASSWORD.show();
     	}
     }
-   
 
-    /**
+	@Override
+	protected void onStart() {
+		super.onStart();
+		LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("dismissconnectingToSshProgressDialog"));
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+	}
+
+	/**
      * Metoda odpowiedzialna za tworzenie okien dialogowych wyświetlanych przez aktywność.
      * @see android.app.Activity#onCreateDialog(int, android.os.Bundle)
      */
@@ -840,6 +874,9 @@ public class ServerList extends Activity{
 						intent_start_ConnectAndPlayService.putExtra("username", id_of_clicked_button);
 						intent_start_ConnectAndPlayService.putExtra("password", server_password);
 	     				startService(intent_start_ConnectAndPlayService);
+
+						connectingToSshProgressDialog = ProgressDialog.show(ServerList.this, "",getString(R.string.text_for_progressdialog_from_connecttoserver), true, true);
+
 	     				removeDialog(DIALOG_GIVE_ME_A_SERVER_PASSWORD);
 	     				Arrays.fill(server_password, '0');
 				    }	
@@ -1657,7 +1694,7 @@ public class ServerList extends Activity{
 			public void onClick(View v) {
 
 				startService(intent_start_ConnectAndPlayService);
-
+				connectingToSshProgressDialog = ProgressDialog.show(ServerList.this, "",getString(R.string.text_for_progressdialog_from_connecttoserver), true, true);
 			}
 		});
 		ll.addView(button_connect_to);

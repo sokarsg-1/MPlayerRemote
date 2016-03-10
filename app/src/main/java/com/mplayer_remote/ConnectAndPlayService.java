@@ -311,12 +311,20 @@ public class ConnectAndPlayService extends Service {
     }
 
     /**
-     * Notifing observers about changing of nowPlayingFileString.
+     * Notifying observers about changing of nowPlayingFileString.
      */
     private void sendBroadcastnowPlayingFileStringChange(){
         Intent intent = new Intent("nowPlayingFileStringChange");
         // You can also include some extra data.
         intent.putExtra("NewnowPlayingFileString", nowPlayingFileString);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    /**
+     * Notifying observers about connecting to SSH server.
+     */
+    private void sendBroadcastdismissconnectingToSshProgressDialog(){
+        Intent intent = new Intent("dismissconnectingToSshProgressDialog");
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
@@ -682,6 +690,7 @@ public class ConnectAndPlayService extends Service {
         @Override
         protected void onPostExecute(Boolean isConnectedBoolean){
 
+            sendBroadcastdismissconnectingToSshProgressDialog();
 
             myConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo info = myConnectivityManager.getActiveNetworkInfo();

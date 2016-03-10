@@ -267,7 +267,7 @@ public class FileChooser extends ListActivity{
 
 		if (mBound) {
 
-			if(getIntent().getStringExtra("absolute_path") != null){	//intent from RemoteControl.onBackPressed()
+			if(getIntent().getStringExtra("absolute_path") != null){	//intent from RemoteControl.onBackPressed(), this not work because http://stackoverflow.com/questions/20695522/puzzling-behavior-with-reorder-to-front
 				absolute_path = getIntent().getStringExtra("absolute_path");
 				Log.v(TAG, "Back button from RemoteControl");
 

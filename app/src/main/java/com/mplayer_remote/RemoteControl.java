@@ -216,7 +216,7 @@ public class RemoteControl extends Activity{
 	};
 
 	// Our handler for received Intents. This will be called whenever an Intent
-	// with an action named "custom-event-name" is broadcasted.
+	// with an action named "NewnowPlayingFileString" is broadcasted.
 	private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -492,6 +492,7 @@ public class RemoteControl extends Activity{
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
 	}
 
+	/*not work because http://stackoverflow.com/questions/20695522/puzzling-behavior-with-reorder-to-front
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
@@ -501,6 +502,7 @@ public class RemoteControl extends Activity{
 		resultIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);	//redirect intent to existing FileChooser insted starting a new one in task
 		startActivity(resultIntent);
 	}
+	*/
 
 	/**
 	 * Metoda wywoływana przez system Android przy wznawianiu wyświetlania aktywności. 
