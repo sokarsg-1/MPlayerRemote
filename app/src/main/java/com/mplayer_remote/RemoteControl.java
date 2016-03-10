@@ -92,11 +92,7 @@ public class RemoteControl extends Activity{
 	 */
 	private int timePositionInSecondsint;
 	
-	/**
-	 * Zmienna logiczna przechowująca informacje czy pole tekstowe <code>TimeLengthTextView </code>zostało już ustawione przez wątek <code>read_time_lengthThread</code>.  
-	 */
-	private boolean isTimeLengthTextViewSetboolean = false;		// read_time_lengthThread stops when true
-	
+
 	/**
 	 * Łańcuch znaków zawierający długość pliku multimedialnego wyrażoną takiej samej notacji jakiej używa MPlayer czyli <code>godziny:minuty:sekundy</code>.
 	 */
@@ -425,13 +421,6 @@ public class RemoteControl extends Activity{
 		         int progress = msg.arg1;
 		         //int state = msg.arg2;
 		         seekBar.setProgress(progress);
-
-		         
-		         if (progress >= 100){
-		            
-		             
-		        	 readProgressThread.interrupt();
-		         }
 		     };
 		 }; 
 	     
@@ -452,7 +441,7 @@ public class RemoteControl extends Activity{
 		        }
 		        Log.v(TAG, "timeLength in timeLengthUpdateHandler is : " + timeLengthMPlayerLikeString);
 		        timeLengthTextView.setText(timeLengthMPlayerLikeString);
-		        isTimeLengthTextViewSetboolean = true;
+
 		        
 		    };
 		};
@@ -526,11 +515,9 @@ public class RemoteControl extends Activity{
         askMplayerThread = new Thread(new AskMplayerRunnable()); 
         askMplayerThread.start();
         
-	    if (isTimeLengthTextViewSetboolean == false){
-	    	readTimeLengthThread = new Thread(new ReadTimeLengthRunnable(timeLengthTextViewUpdateHandler));
-	    	readTimeLengthThread.start();
-	    }
-	     
+	    readTimeLengthThread = new Thread(new ReadTimeLengthRunnable(timeLengthTextViewUpdateHandler));
+	    readTimeLengthThread.start();
+
 	    readTimePositionThread = new Thread(new ReadTimePositionRunnable(timePositionUpdateHandler));
 	    readTimePositionThread.start();
 
@@ -561,7 +548,7 @@ public class RemoteControl extends Activity{
     @Override
     protected void onPause() {
         super.onPause();
-        isTimeLengthTextViewSetboolean = false;
+
         askMplayerThread.interrupt();
         readTimeLengthThread.interrupt();
         readTimePositionThread.interrupt();
@@ -676,10 +663,9 @@ public class RemoteControl extends Activity{
 		public void run() {
 			
 			while (isMyServiceRunning() == true){
-				if (isTimeLengthTextViewSetboolean == false) {
-					if (mBound == true) {
-						mConnectAndPlayService.sendCommand("echo pausing_keep_force get_time_length > fifofile");
-					}
+
+				if (mBound == true) {
+					mConnectAndPlayService.sendCommand("echo pausing_keep_force get_time_length > fifofile");
 				}
 
 
@@ -740,7 +726,7 @@ public class RemoteControl extends Activity{
 	            	Thread.sleep(100);
         		}
 
-				while (isMyServiceRunning() == true && isTimeLengthTextViewSetboolean == false) {
+				while (isMyServiceRunning() == true ) {
 
 					ConnectAndPlayService.mplayerOutputArrayListLock.lock();
 			        try
