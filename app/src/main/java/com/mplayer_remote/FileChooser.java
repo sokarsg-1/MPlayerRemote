@@ -174,24 +174,16 @@ public class FileChooser extends ListActivity{
 	Bundle mSavedInstanceState;	// for createUI
 
 
-	public String getfile_to_play(){
-		return file_to_play;
-	}
-
-	public String getabsolute_path(){
-		return absolute_path;
-	}
-
 	/**
 	 * For fragments.
-	 * @return
+	 * @return mBound
 	 */
 	public boolean getmBound(){
 		return mBound;
 	}
 	/**
 	 * For fragments.
-	 * @return
+	 * @return mConnectAndPlayService
 	 */
 	public ConnectAndPlayService getmConnectAndPlayService(){
 		return mConnectAndPlayService;
@@ -262,7 +254,7 @@ public class FileChooser extends ListActivity{
 		//absolute_path = getIntent().getStringExtra("absolute_path");	//this will by not null if back from notyfication
 
 		Log.v(TAG, "file_to_play: " + file_to_play);
-		Log.v(TAG, "absolute_path: " + absolute_path);
+		Log.v(TAG, "absolute_path on start createUI(): " + absolute_path);
 		//Log.v(TAG, "mSavedInstanceState: " + mSavedInstanceState);
 
 		if (mBound) {
@@ -561,7 +553,8 @@ public class FileChooser extends ListActivity{
 		List<String> tempList = new ArrayList<String>();
 		tempList = Arrays.asList(tempArray);
 		defaultAllKnowMediaFileExtensionsArrayList = new ArrayList<String>(tempList);
-		checkedFileExtensionbooleanarray = new boolean[defaultAllKnowMediaFileExtensionsArrayList.size()];
+
+		checkedFileExtensionbooleanarray = new boolean[defaultAllKnowMediaFileExtensionsArrayList.size()];	//contain true, false values
 		checkedFileExtensionsSharedPreferences = getSharedPreferences(FILENAME, Context.MODE_PRIVATE);
 		for (int i = 0; i < defaultAllKnowMediaFileExtensionsArrayList.size(); i++){
 			checkedFileExtensionbooleanarray[i] = checkedFileExtensionsSharedPreferences.getBoolean(defaultAllKnowMediaFileExtensionsArrayList.get(i), true);
@@ -578,19 +571,23 @@ public class FileChooser extends ListActivity{
 
 
 		ArrayList<String> FilesWithKnowExtensions = new ArrayList<String>();
+
+
 		String FileName = null;
 		int positionOfLastDot = 0;
 		for (int i = 0; i < FilesArrayList.size(); i++){
 			FileName = FilesArrayList.get(i);
-			positionOfLastDot = FileName.lastIndexOf(".");
-			if (positionOfLastDot == -1){
-				for(String dirname: only_dir_from_absolute_path){
-					if(FileName.equals(dirname)) {
-						FilesWithKnowExtensions.add(FileName);
-					}
-				}
 
-			}else {
+
+			for(String dirname: only_dir_from_absolute_path){
+				if (dirname.equals(FileName)){
+					FilesWithKnowExtensions.add(FileName);
+				}
+			}
+
+			positionOfLastDot = FileName.lastIndexOf(".");
+			if (positionOfLastDot != -1){
+
 				String fileNameExtensionString = FileName.substring(positionOfLastDot + 1);
 				for (int j = 0; j < defaultAllKnowMediaFileExtensionsArrayList.size(); j++) {
 					if (fileNameExtensionString.equals(defaultAllKnowMediaFileExtensionsArrayList.get(j)) && checkedFileExtensionbooleanarray[j] == true) {
