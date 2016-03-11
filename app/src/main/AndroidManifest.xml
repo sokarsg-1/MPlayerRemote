@@ -34,6 +34,7 @@
 
         <activity
             android:name=".FileChooser"
+            android:launchMode="singleInstance"
             android:parentActivityName=".ServerList">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -42,6 +43,7 @@
 
         <activity
             android:name=".RemoteControl"
+            android:launchMode="singleInstance"
             android:parentActivityName=".FileChooser">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

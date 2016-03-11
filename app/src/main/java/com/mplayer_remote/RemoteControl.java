@@ -492,14 +492,14 @@ public class RemoteControl extends Activity{
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
 	}
 
-	/*not work because http://stackoverflow.com/questions/20695522/puzzling-behavior-with-reorder-to-front
+	/*
+	//not work because http://stackoverflow.com/questions/20695522/puzzling-behavior-with-reorder-to-front
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
 		Intent resultIntent = new Intent(this, FileChooser.class);
-		//resultIntent.putExtra("file_to_play", fileToPlayString);
 		resultIntent.putExtra("absolute_path", absolutePathString);
-		resultIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);	//redirect intent to existing FileChooser insted starting a new one in task
+		//resultIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);	//redirect intent to existing FileChooser insted starting a new one in task
 		startActivity(resultIntent);
 	}
 	*/
