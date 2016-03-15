@@ -242,7 +242,7 @@ public class RemoteControl extends Activity{
 		 super.onCreate(savedInstanceState);
 		 getActionBar().setDisplayHomeAsUpEnabled(false);
 
-		 //RemoteControlActivityObject = this;
+
 
 		 Intent intentFromstartActivity = getIntent(); //getIntent() zwraca obiekt Intent który wystartował Activity
 		 fileToPlayString = intentFromstartActivity.getStringExtra("file_to_play");
@@ -280,12 +280,11 @@ public class RemoteControl extends Activity{
 					//askMplayerThread.interrupt();
 				if( mBound == true ) {
 					mConnectAndPlayService.stopPlaying();
-					//mConnectAndPlayService.sendCommand("echo stop > fifofile");
-					//ConnectToServer.sendCommand("rm fifofile");
-					//stopService(new Intent(getApplicationContext(), com.mplayer_remote.ServicePlayAFile.class));
-					finish();
+
 					mVibrator.vibrate(50);
-					onBackPressed();
+					finish();
+
+
 				}
 				
 			}
@@ -311,9 +310,6 @@ public class RemoteControl extends Activity{
 				//askMplayerThread.interrupt();
 				if( mBound == true ) {
 					mConnectAndPlayService.playNextMedia();
-					//mConnectAndPlayService.sendCommand("echo stop > fifofile");
-					//ConnectToServer.sendCommand("rm fifofile");
-					//RemoteControlActivityObject.finish();
 					mVibrator.vibrate(50);
 
 				}
@@ -492,18 +488,6 @@ public class RemoteControl extends Activity{
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
 	}
 
-	/*
-	//not work because http://stackoverflow.com/questions/20695522/puzzling-behavior-with-reorder-to-front
-	@Override
-	public void onBackPressed() {
-		super.onBackPressed();
-		Intent resultIntent = new Intent(this, FileChooser.class);
-		resultIntent.putExtra("absolute_path", absolutePathString);
-		//resultIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);	//redirect intent to existing FileChooser insted starting a new one in task
-		startActivity(resultIntent);
-	}
-	*/
-
 	/**
 	 * Metoda wywoływana przez system Android przy wznawianiu wyświetlania aktywności. 
 	 * Uruchamia wątki <code>askMplayerThread</code>, <code>readTimeLengthThread</code>, <code>readTimePositionThread</code>, <code>readProgressThread</code>.
@@ -627,7 +611,7 @@ public class RemoteControl extends Activity{
 			if (mBound == true) {
 				mConnectAndPlayService.sendCommand("echo key_down_event 47 > fifofile");
 			}
-			return true;
+			return true; //because I handled the event
 		}
 		return false; //otherwise the system can handle it        
 	}

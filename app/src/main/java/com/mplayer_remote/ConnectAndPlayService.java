@@ -4,9 +4,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -18,6 +20,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
@@ -88,7 +91,7 @@ public class ConnectAndPlayService extends Service {
     /**
      * Now playing file in mplayer;
      */
-    private String nowPlayingFileString;
+    private String nowPlayingFileString = null;
 
     /**
      * Łańcuch znaków zawierający ścieżkę absolutną, w której znajduje się plik wskazany przez użytkownika do odtworzenia w programie MPlayer.
@@ -104,6 +107,27 @@ public class ConnectAndPlayService extends Service {
      */
     private NotificationManager mNotificationManager;
     private int mId = 1;		//for notyfication
+
+    // Our handler for received Intents. This will be called whenever an Intent
+    // with an action named "notyficationAction" is broadcasted.
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            String commandFormNotyficationActionReceiverString = intent.getStringExtra("command");
+
+            if (commandFormNotyficationActionReceiverString.equals("previous")){
+                playPreviousMedia();
+            }else if(commandFormNotyficationActionReceiverString.equals("pause")){
+                sendCommand("echo pausing_keep pause > fifofile");
+            }else if(commandFormNotyficationActionReceiverString.equals("next")){
+                playNextMedia();
+            }
+            Log.d("receiver", "Got command from notyfication action button: " + commandFormNotyficationActionReceiverString);
+
+        }
+    };
+
     /**
      * Default constructor.
      */
@@ -113,33 +137,24 @@ public class ConnectAndPlayService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {      //TODO place somewhere stopSelf()
 
-        String commandFormNotyficationActionReceiverString = intent.getStringExtra("command");
-        if (commandFormNotyficationActionReceiverString != null){   //intent form notyfication buttons
-            if (commandFormNotyficationActionReceiverString.equals("previous")){
-                this.playPreviousMedia();
-            }else if(commandFormNotyficationActionReceiverString.equals("pause")){
-                this.sendCommand("echo pausing_keep pause > fifofile");
-            }else if(commandFormNotyficationActionReceiverString.equals("next")){
-                this.playNextMedia();
-            }
-        }else { //started by click on SSH server button in ServerList activity
-
-                //connecting to new SSH server so clean fields
-            absolutePathString = null;
-            playListArrayList = null;
-
-            String serverNameString = intent.getStringExtra("server_name");
-            String iPAddressString = intent.getStringExtra("IP_address");
-            String usernameString = intent.getStringExtra("username");
-            char[] serverPasswordchararray = intent.getCharArrayExtra("password");
-            String serverPasswordString = new String(serverPasswordchararray);
-
-            Log.v(TAG, "Server data form intent: " + serverNameString + iPAddressString + usernameString + serverPasswordString);
-
-            new ConnectToAsyncTask().execute(serverNameString, iPAddressString, usernameString, serverPasswordString);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("ButtonActionInNotyficationClicked"));
 
 
-        }
+            //connecting to new SSH server so clean fields
+        nowPlayingFileString = null;
+        absolutePathString = null;
+        playListArrayList = null;
+
+        String serverNameString = intent.getStringExtra("server_name");
+        String iPAddressString = intent.getStringExtra("IP_address");
+        String usernameString = intent.getStringExtra("username");
+        char[] serverPasswordchararray = intent.getCharArrayExtra("password");
+        String serverPasswordString = new String(serverPasswordchararray);
+
+        Log.v(TAG, "Server data form intent: " + serverNameString + iPAddressString + usernameString + serverPasswordString);
+
+        new ConnectToAsyncTask().execute(serverNameString, iPAddressString, usernameString, serverPasswordString);
+
         return START_STICKY;
     }
 
@@ -148,6 +163,7 @@ public class ConnectAndPlayService extends Service {
         super.onDestroy();
         Log.v(TAG, "ConnectAndPlayService destroyed");
 
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
 
     }
 
@@ -296,25 +312,27 @@ public class ConnectAndPlayService extends Service {
     }
 
     /**
+     * For using in playNextMedia() and playPreviousMedia()
+     */
+    private void stopPlayingPlayList(){
+        sendCommand("echo stop > fifofile");
+        es.shutdownNow();
+
+
+    }
+
+    /**
      * Return now played file.
      */
     public String getNowPlayingFileString(){
         return nowPlayingFileString;
     }
+
     /**
      * Return current absolutePathString.
      */
     public String getAbsolutePathString(){
         return absolutePathString;
-    }
-
-    /**
-     * For using in playNextMedia() and playPreviousMedia()
-     */
-    private void stopPlayingPlayList(){
-        es.shutdownNow();
-        sendCommand("echo stop > fifofile");
-        sendCommand("rm fifofile");
     }
 
     /**
@@ -365,7 +383,7 @@ public class ConnectAndPlayService extends Service {
         Intent resultIntent = new Intent(this, RemoteControl.class);
         resultIntent.putExtra("file_to_play", fileToPlayString);
         resultIntent.putExtra("absolute_path", absolutePathString);
-        resultIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        //resultIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
 
         // The stack builder object will contain an artificial back stack for the
         // started Activity.

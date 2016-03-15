@@ -13,22 +13,22 @@ public class NotyficationActionReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
-        Intent sendCommandToConnectAndPlayServiceIntent = new Intent(context, ConnectAndPlayService.class);
+        Intent sendBroadcastToConnectAndPlayServiceIntent = new Intent("ButtonActionInNotyficationClicked");
 
         Vibrator mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 
         if (action.equals("previous")){
-            sendCommandToConnectAndPlayServiceIntent.putExtra("command","previous");
+            sendBroadcastToConnectAndPlayServiceIntent.putExtra("command", "previous");
             mVibrator.vibrate(50);
-            context.startService(sendCommandToConnectAndPlayServiceIntent);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(sendBroadcastToConnectAndPlayServiceIntent);
         }else if (action.equals("pause")){
-            sendCommandToConnectAndPlayServiceIntent.putExtra("command","pause");
+            sendBroadcastToConnectAndPlayServiceIntent.putExtra("command", "pause");
             mVibrator.vibrate(50);
-            context.startService(sendCommandToConnectAndPlayServiceIntent);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(sendBroadcastToConnectAndPlayServiceIntent);
         }else if (action.equals("next")){
-            sendCommandToConnectAndPlayServiceIntent.putExtra("command","next");
+            sendBroadcastToConnectAndPlayServiceIntent.putExtra("command", "next");
             mVibrator.vibrate(50);
-            context.startService(sendCommandToConnectAndPlayServiceIntent);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(sendBroadcastToConnectAndPlayServiceIntent);
         }
     }
 }
