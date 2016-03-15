@@ -1547,6 +1547,9 @@ public class ServerList extends Activity{
         	if (appPasswordcharArray != null){
         		Arrays.fill(appPasswordcharArray,'0');
         		appPasswordcharArray = null;
+					//ensure that service ConnectAndPlayService is stoped
+				Intent intent_start_ConnectAndPlayService = new Intent(getApplicationContext(), ConnectAndPlayService.class);
+				stopService(intent_start_ConnectAndPlayService);
         	}
             this.finish();
             return true;

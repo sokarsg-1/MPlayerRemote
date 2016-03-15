@@ -93,7 +93,7 @@ public class ConnectAndPlayService extends Service {
     /**
      * Łańcuch znaków zawierający ścieżkę absolutną, w której znajduje się plik wskazany przez użytkownika do odtworzenia w programie MPlayer.
      */
-    private String absolutePathString;
+    private String absolutePathString = null;
 
     /**
      * A playList from FileChooser
@@ -123,6 +123,11 @@ public class ConnectAndPlayService extends Service {
                 this.playNextMedia();
             }
         }else { //started by click on SSH server button in ServerList activity
+
+                //connecting to new SSH server so clean fields
+            absolutePathString = null;
+            playListArrayList = null;
+
             String serverNameString = intent.getStringExtra("server_name");
             String iPAddressString = intent.getStringExtra("IP_address");
             String usernameString = intent.getStringExtra("username");
@@ -132,6 +137,8 @@ public class ConnectAndPlayService extends Service {
             Log.v(TAG, "Server data form intent: " + serverNameString + iPAddressString + usernameString + serverPasswordString);
 
             new ConnectToAsyncTask().execute(serverNameString, iPAddressString, usernameString, serverPasswordString);
+
+
         }
         return START_STICKY;
     }
@@ -691,6 +698,13 @@ public class ConnectAndPlayService extends Service {
         protected void onPostExecute(Boolean isConnectedBoolean){
 
             sendBroadcastdismissconnectingToSshProgressDialog();
+                //for resetting last_visited_dir in lastVisitedSharedPreferences
+            ArrayList<String> userHomeDirString = new ArrayList<String>();
+            sendCommandAndSaveOutputToArrayList("echo $HOME", userHomeDirString);
+            SharedPreferences lastVisitedSharedPreferences = getSharedPreferences("lastVisitedSharedPreferences", MODE_PRIVATE);
+            SharedPreferences.Editor mEditor = lastVisitedSharedPreferences.edit();
+            mEditor.putString("last_visited_dir", userHomeDirString.get(0));
+            mEditor.commit();
 
             myConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo info = myConnectivityManager.getActiveNetworkInfo();

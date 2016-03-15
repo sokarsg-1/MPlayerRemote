@@ -148,6 +148,9 @@ public class FileChooser extends ListActivity{
 	private boolean[] checkedFileExtensionbooleanarray;     //Where we track the selected items
 	private SharedPreferences checkedFileExtensionsSharedPreferences;   //Where are saved selected by user file extensions
 
+
+	private SharedPreferences lastVisitedSharedPreferences;
+
 	private ConnectAndPlayService mConnectAndPlayService;
 	private boolean mBound = false;
 
@@ -163,6 +166,7 @@ public class FileChooser extends ListActivity{
 			mBound = true;
 
 			createUI();
+
 		}
 
 		@Override
@@ -171,7 +175,6 @@ public class FileChooser extends ListActivity{
 		}
 	};
 
-	Bundle mSavedInstanceState;	// for createUI
 
 
 	/**
@@ -201,24 +204,6 @@ public class FileChooser extends ListActivity{
     }
 
 
-	@Override
-	protected void onRestoreInstanceState(Bundle state) {
-		super.onRestoreInstanceState(state);
-		absolute_path = state.getString("absolute_path");
-
-	}
-
-	/**
-	 * Metoda wywoływana przez system Android przed zniszczeniem aktywności, służy do zapamiętywania stanu aktywności, tu konkretnie miejsca w drzewie katalogów serwera, które jest aktualnie wyświetlane przez GUI.
-	 * @see android.app.Activity#onSaveInstanceState(android.os.Bundle)
-	 */
-	@Override
-	protected void onSaveInstanceState(Bundle instanceStateToSave) {
-		instanceStateToSave.putString("absolute_path", absolute_path);
-
-
-	}
-
 
 	@Override
 	protected void onStart() {
@@ -228,6 +213,8 @@ public class FileChooser extends ListActivity{
 		Intent intent = new Intent(this, ConnectAndPlayService.class);
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
+		lastVisitedSharedPreferences = getSharedPreferences("lastVisitedSharedPreferences",MODE_PRIVATE);
+		absolute_path = lastVisitedSharedPreferences.getString("last_visited_dir", "home");
 	}
 
 	@Override
@@ -238,6 +225,10 @@ public class FileChooser extends ListActivity{
 			unbindService(mConnection);
 			mBound = false;
 		}
+
+		SharedPreferences.Editor mEditor = lastVisitedSharedPreferences.edit();
+		mEditor.putString("last_visited_dir", absolute_path);
+		mEditor.commit();
 	}
 
 	@Override
@@ -249,56 +240,22 @@ public class FileChooser extends ListActivity{
 		stopService(intent_start_ConnectAndPlayService);
 	}
 
-	private void createUI(){ //TODO zapisywać file_to_play i absolute_path w onStop w onStart odczytywać, w onCreate resetować zmienne w sharedPreferences
-		//file_to_play = getIntent().getStringExtra("file_to_play");	//this will by not null if back from notyfication
-		//absolute_path = getIntent().getStringExtra("absolute_path");	//this will by not null if back from notyfication
+	private void createUI(){
 
-		Log.v(TAG, "file_to_play: " + file_to_play);
+
+
 		Log.v(TAG, "absolute_path on start createUI(): " + absolute_path);
-		//Log.v(TAG, "mSavedInstanceState: " + mSavedInstanceState);
+
 
 		if (mBound) {
 
-			if(getIntent().getStringExtra("absolute_path") != null){	//intent from RemoteControl.onBackPressed(), this not work because http://stackoverflow.com/questions/20695522/puzzling-behavior-with-reorder-to-front
-				absolute_path = getIntent().getStringExtra("absolute_path");
-				Log.v(TAG, "Back button from RemoteControl");
 
-				dir_contain = new ArrayList<String>();//erasing
-				dir_contain.add("..");
 
-				mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path + "/" + "'", dir_contain);
-				mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep -v /", only_file_from_absolute_path);
+			dir_contain = new ArrayList<String>();//erasing
+			dir_contain.add("..");
 
-				getIntent().removeExtra("absolute_path"); //intent from RemoteControl.onBackPressed() consumed, erase extra
-
-			}else if (absolute_path == null) { // FileChooser started from ConnectAndPlayService
-				Log.v(TAG, "Fresh start");
-				//sendCommandAndSaveOutputToArrayList("ls -p | grep -v /");
-
-				dir_contain = new ArrayList<String>();//erasing
-				mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("echo $HOME", dir_contain);
-
-				absolute_path = dir_contain.get(0);
-				dir_contain = new ArrayList<String>();//erasing
-				dir_contain.add("..");
-
-				mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path + "/" + "'", dir_contain);
-				mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep -v /", only_file_from_absolute_path);
-
-				for (int i = 0; i < dir_contain.size(); i++) {
-					Log.v(TAG, dir_contain.get(i));
-				}
-
-			}else if (absolute_path != null) { //FileChooser is being restarted by for example screen rotation
-				Log.v(TAG, "Restart");
-
-				dir_contain = new ArrayList<String>();//erasing
-				dir_contain.add("..");
-
-				mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path + "/" + "'", dir_contain);
-				mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep -v /", only_file_from_absolute_path);
-			}
-
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls --group-directories-first  " + "'" + absolute_path + "/" + "'", dir_contain);
+			mConnectAndPlayService.sendCommandAndSaveOutputToArrayList("ls -p " + "'" + absolute_path + "/" + "'" + "| grep -v /", only_file_from_absolute_path);
 
 
 			settingsForAPPSharedPreferences = settingsForAPPSharedPreferences = getSharedPreferences("settings_for_APP", 0);
