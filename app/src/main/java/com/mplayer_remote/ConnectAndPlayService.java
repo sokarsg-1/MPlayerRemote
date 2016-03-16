@@ -205,6 +205,12 @@ public class ConnectAndPlayService extends Service {
             sendCommand("mkfifo fifofile");
         }
 
+        Intent intent_start_RemoteControl = new Intent(this, RemoteControl.class);
+        intent_start_RemoteControl.putExtra("file_to_play", filesToPlayArrayList.get(0));
+        intent_start_RemoteControl.putExtra("absolute_path", absolutePathString);
+        intent_start_RemoteControl.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); //When using this flag, if a task is already running for the activity you are now starting, then a new activity will not be started; instead, the current task will simply be brought to the front of the screen with the state it was last in.
+        startActivity(intent_start_RemoteControl);
+
         ArrayList<Runnable> myRunnablesArrayList = new ArrayList<Runnable>(filesToPlayArrayList.size());
         for(final String file : filesToPlayArrayList){
             Runnable r = new Runnable() {
@@ -213,12 +219,7 @@ public class ConnectAndPlayService extends Service {
                     Log.v(TAG,"Starting playing file: " + file + " from absolutePath: " + absolutePathString);
                     nowPlayingFileString = file;
                     showNotyfications(file, absolutePathString);
-                    Intent intent_start_RemoteControl = new Intent(getApplicationContext(), RemoteControl.class);
-                    intent_start_RemoteControl.putExtra("file_to_play", file);
-                    intent_start_RemoteControl.putExtra("absolute_path", absolutePathString);
-                    intent_start_RemoteControl.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    //intent_start_RemoteControl.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-                    startActivity(intent_start_RemoteControl);
+
                     sendCommandAndSaveOutputToLockedArrayList("export DISPLAY=:0.0 && mplayer -fs -slave -quiet -input file=fifofile " + "\"" + file + "\"", mplayerOutputArrayList, mplayerOutputArrayListLock, newMplayerOutputCondition);
                 }
             };
@@ -236,11 +237,6 @@ public class ConnectAndPlayService extends Service {
      */
     private void playASubPlayList (List<String>  filesToPlayArrayList, final String absolutePathString){
 
-        while (isfifofileExist() == false){
-            sendCommand("rm fifofile");
-            sendCommand("mkfifo fifofile");
-        }
-
         es = Executors.newSingleThreadExecutor();
         ArrayList<Runnable> myRunnablesArrayList = new ArrayList<Runnable>(filesToPlayArrayList.size());
         for(final String file : filesToPlayArrayList){
@@ -250,14 +246,7 @@ public class ConnectAndPlayService extends Service {
                     nowPlayingFileString = file;
                     sendBroadcastnowPlayingFileStringChange();
                     showNotyfications(file, absolutePathString);
-                    /*
-                    Intent intent_start_RemoteControl = new Intent(getApplicationContext(), RemoteControl.class);
-                    intent_start_RemoteControl.putExtra("file_to_play", file);
-                    //intent_start_RemoteControl.putExtra("absolute_path", absolutePathString);
-                    intent_start_RemoteControl.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    //intent_start_RemoteControl.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-                    startActivity(intent_start_RemoteControl);
-                    */
+
                     sendCommandAndSaveOutputToLockedArrayList("export DISPLAY=:0.0 && mplayer -fs -slave -quiet -input file=fifofile " + "\"" + file + "\"", mplayerOutputArrayList, mplayerOutputArrayListLock, newMplayerOutputCondition);
                 }
             };
@@ -273,8 +262,9 @@ public class ConnectAndPlayService extends Service {
      * Stops playing one file or files.
      */
     public void stopPlaying(){
-        sendCommand("echo stop > fifofile");
-        es.shutdownNow();
+        //sendCommand("echo stop > fifofile");
+        es.shutdownNow();   //stops executing all next task from es
+        sendCommand("pkill mplayer");   //stops now working mplayer instance
         sendCommand("rm fifofile");
         stopForeground(true);
 
@@ -288,7 +278,7 @@ public class ConnectAndPlayService extends Service {
         int nowPlayingFileintIndex = playListArrayList.indexOf(nowPlayingFileString);
         List<String> localPlaylist;
         if (nowPlayingFileintIndex + 1 == playListArrayList.size()){
-            Toast.makeText(getApplicationContext(), R.string.text_for_toast_end_of_playlist, Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.text_for_toast_end_of_playlist, Toast.LENGTH_SHORT).show();
         }else {
             stopPlayingPlayList();
             localPlaylist = playListArrayList.subList(nowPlayingFileintIndex + 1, playListArrayList.size());
@@ -303,7 +293,7 @@ public class ConnectAndPlayService extends Service {
         int nowPlayingFileintIndex = playListArrayList.indexOf(nowPlayingFileString);
         List<String> localPlaylist;
         if (nowPlayingFileintIndex == 0){
-            Toast.makeText(getApplicationContext(), R.string.text_for_toast_end_of_playlist, Toast.LENGTH_LONG).show();
+            Toast.makeText(getApplicationContext(), R.string.text_for_toast_end_of_playlist, Toast.LENGTH_SHORT).show();
         }else {
             stopPlayingPlayList();
             localPlaylist = playListArrayList.subList(nowPlayingFileintIndex - 1, playListArrayList.size());
@@ -315,10 +305,16 @@ public class ConnectAndPlayService extends Service {
      * For using in playNextMedia() and playPreviousMedia()
      */
     private void stopPlayingPlayList(){
-        sendCommand("echo stop > fifofile");
+
         es.shutdownNow();
 
-
+        try {
+            do {
+                sendCommand("pkill mplayer");
+            }while(es.awaitTermination(200, TimeUnit.MILLISECONDS) == false);   //false if timeout
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -383,7 +379,7 @@ public class ConnectAndPlayService extends Service {
         Intent resultIntent = new Intent(this, RemoteControl.class);
         resultIntent.putExtra("file_to_play", fileToPlayString);
         resultIntent.putExtra("absolute_path", absolutePathString);
-        //resultIntent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         // The stack builder object will contain an artificial back stack for the
         // started Activity.
