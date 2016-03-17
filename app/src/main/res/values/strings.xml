@@ -60,7 +60,7 @@
     <string name="text_for_toast_turn_wifi_or_3g_on_from_connecttoserver">Please turn on Wi-Fi or 3G or Wi-fi Tethering</string>
     <string name="text_for_toast_check_server_data_from_connecttoserver">Connection error, please check server data</string>
     
-    <string name="text_for_DIALOG_PLAY_A_FILE_from_FileChooser">Stop playback and play</string>
+    <string name="text_for_DIALOG_PLAY_A_FILE_from_FileChooser">Play</string>
     <string name="text_for_positiveButton_from_DIALOG_PLAY_A_FILE">Yes</string>
 	<string name="text_for_negativeButton_from_DIALOG_PLAY_A_FILE">No</string>
     <string name="text_for_toast_you_do_not_have_rights_to_open_this_directory">You do not have rights to open this directory</string>

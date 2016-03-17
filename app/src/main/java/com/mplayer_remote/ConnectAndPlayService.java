@@ -198,7 +198,7 @@ public class ConnectAndPlayService extends Service {
             sendCommand("mkfifo fifofile");
         }
 
-        Intent intent_start_RemoteControl = new Intent(this, RemoteControl.class);
+        Intent intent_start_RemoteControl = new Intent(getBaseContext(), RemoteControl.class);
         intent_start_RemoteControl.putExtra("file_to_play", filesToPlayArrayList.get(0));
         intent_start_RemoteControl.putExtra("absolute_path", absolutePathString);
         intent_start_RemoteControl.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); //When using this flag, if a task is already running for the activity you are now starting, then a new activity will not be started; instead, the current task will simply be brought to the front of the screen with the state it was last in.
@@ -399,7 +399,7 @@ public class ConnectAndPlayService extends Service {
         Intent resultIntent = new Intent(this, RemoteControl.class);
         resultIntent.putExtra("file_to_play", fileToPlayString);
         resultIntent.putExtra("absolute_path", absolutePathString);
-        resultIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
 
         // The stack builder object will contain an artificial back stack for the
         // started Activity.
@@ -411,29 +411,19 @@ public class ConnectAndPlayService extends Service {
         // Adds the Intent that starts the Activity to the top of the stack
         stackBuilder.addNextIntent(resultIntent);
 
-        /*
-        //for adding fileToPlayString and absolutePathString to intents form stackBuilder
-        for( int i = 0; i < stackBuilder.getIntentCount(); i++ ){
-            Intent intentToEdit = stackBuilder.editIntentAt(i);
-            //intentToEdit.putExtra("file_to_play", fileToPlayString);
-            //intentToEdit.putExtra("absolute_path", absolutePathString);
-            //intentToEdit.setAction(absolutePathString);
-        }
-        */
-
         PendingIntent resultPendingIntent =	stackBuilder.getPendingIntent(0,PendingIntent.FLAG_CANCEL_CURRENT);
 
         Intent previousMediaIntent = new Intent(this, NotyficationActionReceiver.class);
         previousMediaIntent.setAction("previous");      //http://stackoverflow.com/questions/15350998/determine-addaction-click-for-android-notifications
-        PendingIntent previousMediaPendingIntent = PendingIntent.getBroadcast(this, 0, previousMediaIntent, PendingIntent.FLAG_UPDATE_CURRENT );
+        PendingIntent previousMediaPendingIntent = PendingIntent.getBroadcast(this, 0, previousMediaIntent, PendingIntent.FLAG_CANCEL_CURRENT );
 
         Intent pauseMediaIntent = new Intent(this, NotyficationActionReceiver.class);
         pauseMediaIntent.setAction("pause");
-        PendingIntent pauseMediaPendingIntent = PendingIntent.getBroadcast(this, 0, pauseMediaIntent, PendingIntent.FLAG_UPDATE_CURRENT );
+        PendingIntent pauseMediaPendingIntent = PendingIntent.getBroadcast(this, 0, pauseMediaIntent, PendingIntent.FLAG_CANCEL_CURRENT );
 
         Intent nextMediaIntent = new Intent(this, NotyficationActionReceiver.class);
         nextMediaIntent.setAction("next");
-        PendingIntent nextMediaPendingIntent = PendingIntent.getBroadcast(this, 0, nextMediaIntent, PendingIntent.FLAG_UPDATE_CURRENT );
+        PendingIntent nextMediaPendingIntent = PendingIntent.getBroadcast(this, 0, nextMediaIntent, PendingIntent.FLAG_CANCEL_CURRENT );
 
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
@@ -442,8 +432,8 @@ public class ConnectAndPlayService extends Service {
                         .setContentText(secondLineOfNotification)
                         .addAction(R.drawable.previous_media_button, "", previousMediaPendingIntent)
                         .addAction(R.drawable.play_button, "", pauseMediaPendingIntent)
-                        .addAction(R.drawable.next_media_button, "", nextMediaPendingIntent)
-                        .setPriority(NotificationCompat.PRIORITY_MAX);  //for shownig notyfication on top and displaying action buttons
+                        .addAction(R.drawable.next_media_button, "", nextMediaPendingIntent);
+                      //.setPriority(NotificationCompat.PRIORITY_MAX);  //for shownig notyfication on top and displaying action buttons
 
         mBuilder.setContentIntent(resultPendingIntent);
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
