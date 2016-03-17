@@ -218,6 +218,7 @@ public class ConnectAndPlayService extends Service {
                 public void run() {
                     Log.v(TAG,"Starting playing file: " + file + " from absolutePath: " + absolutePathString);
                     nowPlayingFileString = file;
+                    sendBroadcastnowPlayingFileStringChange();
                     showNotyfications(file, absolutePathString);
 
                     sendCommandAndSaveOutputToLockedArrayList("export DISPLAY=:0.0 && mplayer -fs -slave -quiet -input file=fifofile " + "\"" + file + "\"", mplayerOutputArrayList, mplayerOutputArrayListLock, newMplayerOutputCondition);
@@ -228,6 +229,15 @@ public class ConnectAndPlayService extends Service {
         for(Runnable r : myRunnablesArrayList){
             es.submit(r);
         }
+
+        es.submit(new Runnable() {  //stops after reach end of playlist
+            @Override
+            public void run() {
+                stopPlaying();
+                sendBroadcastReachEndOfPlaylist();
+                Log.v(TAG,"Reach end of playlist so stop RemoteControl");
+            }
+        });
 
     }
 
@@ -255,6 +265,15 @@ public class ConnectAndPlayService extends Service {
         for(Runnable r : myRunnablesArrayList){
             es.submit(r);
         }
+
+        es.submit(new Runnable() {  //stops after reach end of playlist
+            @Override
+            public void run() {
+                stopPlaying();
+                sendBroadcastReachEndOfPlaylist();
+                Log.v(TAG, "Reach end of playlist so stop RemoteControl");
+            }
+        });
 
     }
 
@@ -311,7 +330,7 @@ public class ConnectAndPlayService extends Service {
         try {
             do {
                 sendCommand("pkill mplayer");
-            }while(es.awaitTermination(200, TimeUnit.MILLISECONDS) == false);   //false if timeout
+            }while(es.awaitTermination(300, TimeUnit.MILLISECONDS) == false);   //false if timeout
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -338,6 +357,14 @@ public class ConnectAndPlayService extends Service {
         Intent intent = new Intent("nowPlayingFileStringChange");
         // You can also include some extra data.
         intent.putExtra("NewnowPlayingFileString", nowPlayingFileString);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    /**
+     * Notifying observers about reach to end of playlist
+     */
+    private void sendBroadcastReachEndOfPlaylist(){
+        Intent intent = new Intent("ReachEndOfPlaylist");
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 
