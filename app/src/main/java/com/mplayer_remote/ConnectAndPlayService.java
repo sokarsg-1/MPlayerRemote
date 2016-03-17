@@ -2,11 +2,9 @@ package com.mplayer_remote;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.ProgressDialog;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -20,20 +18,15 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -110,7 +103,7 @@ public class ConnectAndPlayService extends Service {
 
     // Our handler for received Intents. This will be called whenever an Intent
     // with an action named "notyficationAction" is broadcasted.
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mnotyficationActionMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Get extra data included in the Intent
@@ -137,7 +130,7 @@ public class ConnectAndPlayService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {      //TODO place somewhere stopSelf()
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("ButtonActionInNotyficationClicked"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mnotyficationActionMessageReceiver, new IntentFilter("ButtonActionInNotyficationClicked"));
 
 
             //connecting to new SSH server so clean fields
@@ -163,7 +156,7 @@ public class ConnectAndPlayService extends Service {
         super.onDestroy();
         Log.v(TAG, "ConnectAndPlayService destroyed");
 
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mnotyficationActionMessageReceiver);
 
     }
 
@@ -218,6 +211,7 @@ public class ConnectAndPlayService extends Service {
                 public void run() {
                     Log.v(TAG,"Starting playing file: " + file + " from absolutePath: " + absolutePathString);
                     nowPlayingFileString = file;
+                    sendBroadcastnowPlayingFileStringChange();
                     showNotyfications(file, absolutePathString);
 
                     sendCommandAndSaveOutputToLockedArrayList("export DISPLAY=:0.0 && mplayer -fs -slave -quiet -input file=fifofile " + "\"" + file + "\"", mplayerOutputArrayList, mplayerOutputArrayListLock, newMplayerOutputCondition);
@@ -228,6 +222,15 @@ public class ConnectAndPlayService extends Service {
         for(Runnable r : myRunnablesArrayList){
             es.submit(r);
         }
+
+        es.submit(new Runnable() {  //stops after reach end of playlist
+            @Override
+            public void run() {
+                stopPlaying();
+                sendBroadcastReachEndOfPlaylist();
+                Log.v(TAG,"Reach end of playlist so stop RemoteControl");
+            }
+        });
 
     }
 
@@ -255,6 +258,15 @@ public class ConnectAndPlayService extends Service {
         for(Runnable r : myRunnablesArrayList){
             es.submit(r);
         }
+
+        es.submit(new Runnable() {  //stops after reach end of playlist
+            @Override
+            public void run() {
+                stopPlaying();
+                sendBroadcastReachEndOfPlaylist();
+                Log.v(TAG, "Reach end of playlist so stop RemoteControl");
+            }
+        });
 
     }
 
@@ -311,7 +323,7 @@ public class ConnectAndPlayService extends Service {
         try {
             do {
                 sendCommand("pkill mplayer");
-            }while(es.awaitTermination(200, TimeUnit.MILLISECONDS) == false);   //false if timeout
+            }while(es.awaitTermination(300, TimeUnit.MILLISECONDS) == false);   //false if timeout
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -338,6 +350,14 @@ public class ConnectAndPlayService extends Service {
         Intent intent = new Intent("nowPlayingFileStringChange");
         // You can also include some extra data.
         intent.putExtra("NewnowPlayingFileString", nowPlayingFileString);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
+    /**
+     * Notifying observers about reach to end of playlist
+     */
+    private void sendBroadcastReachEndOfPlaylist(){
+        Intent intent = new Intent("ReachEndOfPlaylist");
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 

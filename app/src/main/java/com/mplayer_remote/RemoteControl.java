@@ -231,6 +231,15 @@ public class RemoteControl extends Activity{
 			nowPlayFileNameTextView.setText(substringfileToPlayString);
 		}
 	};
+
+	// Our handler for received Intents. This will be called whenever an Intent
+	// with an action named "ReachEndOfPlaylist" is broadcasted.
+	private BroadcastReceiver mReachEndOfPlaylistMessageReceivet = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			finish();
+		}
+	};
 	
 	/**Metoda wywoływana przez system Android przy starcie aktywności.
 	 * Wczytuje definicje GUI z pliku XML. Definiuje akcje wywoływane poprzez interakcji użytkownika z graficznym interfejsem użytkownika aktywności.
@@ -474,6 +483,7 @@ public class RemoteControl extends Activity{
 		bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
 		LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, new IntentFilter("nowPlayingFileStringChange"));
+		LocalBroadcastManager.getInstance(this).registerReceiver(mReachEndOfPlaylistMessageReceivet, new IntentFilter("ReachEndOfPlaylist"));
 	}
 
 	@Override
@@ -486,6 +496,14 @@ public class RemoteControl extends Activity{
 		}
 
 		LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		LocalBroadcastManager.getInstance(this).unregisterReceiver(mReachEndOfPlaylistMessageReceivet); //activity will be finished even if is in background
+
 	}
 
 	/**
