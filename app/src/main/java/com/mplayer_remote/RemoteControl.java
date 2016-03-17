@@ -539,7 +539,7 @@ public class RemoteControl extends Activity{
 	    }
    	 	*/
    	 		//wyłącza Lock Screen
-   	 	lock.disableKeyguard();
+   	 	//lock.disableKeyguard();	//disable because error in android > 5.0, when user launch activity by notification on lock screen a back stack is broken
 	}
 	
 	
@@ -566,7 +566,7 @@ public class RemoteControl extends Activity{
         //absolutePathString = null;
         
         	//włącza Lock Screen
-        lock.reenableKeyguard();
+        //lock.reenableKeyguard(); //disable because error in android > 5.0, when user launch activity by notification on lock screen a back stack is broken
     }
 
     /**
