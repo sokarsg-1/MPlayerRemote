@@ -722,13 +722,7 @@ public class ConnectAndPlayService extends Service {
         protected void onPostExecute(Boolean isConnectedBoolean){
 
             sendBroadcastdismissconnectingToSshProgressDialog();
-                //for resetting last_visited_dir in lastVisitedSharedPreferences
-            ArrayList<String> userHomeDirString = new ArrayList<String>();
-            sendCommandAndSaveOutputToArrayList("echo $HOME", userHomeDirString);
-            SharedPreferences lastVisitedSharedPreferences = getSharedPreferences("lastVisitedSharedPreferences", MODE_PRIVATE);
-            SharedPreferences.Editor mEditor = lastVisitedSharedPreferences.edit();
-            mEditor.putString("last_visited_dir", userHomeDirString.get(0));
-            mEditor.commit();
+
 
             myConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo info = myConnectivityManager.getActiveNetworkInfo();
@@ -757,8 +751,16 @@ public class ConnectAndPlayService extends Service {
                 Toast.makeText(getApplicationContext(), R.string.text_for_toast_turn_wifi_or_3g_on_from_connecttoserver, Toast.LENGTH_LONG).show();
 
             }else if (isConnectedBoolean == true){	//connect succes
-                //connectingDialog.dismiss();
                 Log.v(TAG, "Połączono z serwerem");
+
+                //for resetting last_visited_dir in lastVisitedSharedPreferences
+                ArrayList<String> userHomeDirString = new ArrayList<String>();
+                sendCommandAndSaveOutputToArrayList("echo $HOME", userHomeDirString);
+                SharedPreferences lastVisitedSharedPreferences = getSharedPreferences("lastVisitedSharedPreferences", MODE_PRIVATE);
+                SharedPreferences.Editor mEditor = lastVisitedSharedPreferences.edit();
+                mEditor.putString("last_visited_dir", userHomeDirString.get(0));
+                mEditor.commit();
+
                 final Intent intent_start_FileChooser = new Intent(getApplicationContext(), FileChooser.class);
                 intent_start_FileChooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK); // this start new task may broke app flow
                 startActivity(intent_start_FileChooser);
