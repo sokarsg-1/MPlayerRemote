@@ -869,9 +869,9 @@ public class ServerList extends Activity{
 	     				Log.v(TAG, "id of clicked button: " + id_of_clicked_button);
 	     				Intent intent_start_ConnectToServer = new Intent(getApplicationContext(), ConnectToServer.class);
 						final Intent intent_start_ConnectAndPlayService = new Intent(getApplicationContext(), ConnectAndPlayService.class);
-						intent_start_ConnectAndPlayService.putExtra("server_name", id_of_clicked_button);
-						intent_start_ConnectAndPlayService.putExtra("IP_address", id_of_clicked_button);
-						intent_start_ConnectAndPlayService.putExtra("username", id_of_clicked_button);
+						intent_start_ConnectAndPlayService.putExtra("server_name", serverListArrayList.get(id_of_clicked_button).getServerName());
+						intent_start_ConnectAndPlayService.putExtra("IP_address", serverListArrayList.get(id_of_clicked_button).getIPAddress());
+						intent_start_ConnectAndPlayService.putExtra("username", serverListArrayList.get(id_of_clicked_button).getUsername());
 						intent_start_ConnectAndPlayService.putExtra("password", server_password);
 	     				startService(intent_start_ConnectAndPlayService);
 
