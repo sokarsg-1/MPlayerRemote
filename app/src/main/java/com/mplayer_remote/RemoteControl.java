@@ -48,19 +48,15 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
-import com.mplayer_remote.R.drawable;
-
-import java.util.ArrayList;
-
 /**
  * Aktywność wyświetlająca przyciski oraz pasek przewijania pozwalające na sterowanie odtwarzaniem pliku multimedialnego.
- * Graficzny interfejs użytkownika tej aktywności wyświetla również informacje o długości odtwarzanego pliku i miejscu, w którym obecnie znajduje się odtwarzanie. 
+ * Graficzny interfejs użytkownika tej aktywności wyświetla również informacje o długości odtwarzanego pliku i miejscu, w którym obecnie znajduje się odtwarzanie.
  * Menu aktywności zawiera pozycje, której wybranie uruchamia aktywność <code>SubtitleFileChooser</code>.
  * @author sokar
  * @see android.app.Activity
  */
 public class RemoteControl extends Activity{
-	
+
 		//w celach diagnostycznych nazwa logu dla tego Activity
 	private static final String TAG = "RemoteControl";
 
@@ -76,68 +72,68 @@ public class RemoteControl extends Activity{
 	 * Łańcuch znaków zawierający ścieżkę absolutną, w której znajduje się plik wskazany przez użytkownika.
 	 */
 	private String absolutePathString;
-	
+
 	/**
-	 * Łańcuch znaków zawierający pełna nazwę wraz ze ścieżką absolutną do pliku wskazanego przez użytkownika. 
+	 * Łańcuch znaków zawierający pełna nazwę wraz ze ścieżką absolutną do pliku wskazanego przez użytkownika.
 	 */
 	private String fileToPlayString;
-	
+
 	/**
-	 * Długość pliku multimedialnego wyrażona w sekundach.  
+	 * Długość pliku multimedialnego wyrażona w sekundach.
 	 */
 	private int timeLengthInSecondsint;
-	
+
 	/**
-	 * Ilość sekund liczonych od początku pliku multimedialnego do miejsca, które jest aktualnie odtwarzane.   
+	 * Ilość sekund liczonych od początku pliku multimedialnego do miejsca, które jest aktualnie odtwarzane.
 	 */
 	private int timePositionInSecondsint;
-	
+
 
 	/**
 	 * Łańcuch znaków zawierający długość pliku multimedialnego wyrażoną takiej samej notacji jakiej używa MPlayer czyli <code>godziny:minuty:sekundy</code>.
 	 */
 	private String timeLengthMPlayerLikeString;
-	
+
 	/**
 	 * Łańcuch znaków zawierający czas, wyrażony w notacji używanej przez odtwarzacz MPlayer (<code>godziny:minuty:sekundy</code>),
 	 * który upłynął od początku pliku multimedialnego do miejsca obecnie odtwarzanego.
 	 */
 	private String timePositionMPlayerLikeString;
-	
+
 	/**
 	 * Wątek utworzony z klasy <code>AskMplayerRunnable</code> implementującej interfejs <code>Runnable</code>, wysyłający do Mplayer' a polecenia <code>get_time_length</code>, <code>get_time_pos</code> i <code>get_percent_pos</code>.
 	 * @see com.mplayer_remote.RemoteControl.AskMplayerRunnable
 	 */
 	private Thread askMplayerThread;
-	
+
 	/**
 	 * Wątek utworzony z klasy <code>readProgressRunnable</code> implementującej interfejs <code>Runnable</code>.
 	 * @see com.mplayer_remote.readProgressRunnable
 	 */
 	private Thread readProgressThread;
-	
+
 	/**
 	 *  Wątek utworzony z klasy <code>readTimeLengthRunnable</code> implementującej interfejs <code>Runnable</code>.
 	 *  @see com.mplayer_remote.readTimeLengthRunnable
 	 */
 	private Thread readTimeLengthThread;
-	
+
 	/**
 	 * Wątek utworzony z klasy <code>readTimePositionRunnable</code> implementującej interfejs <code>Runnable</code>.
 	 * @see com.mplayer_remote.readTimePositionRunnable
 	 */
 	private Thread readTimePositionThread;
-	
+
 	/**
-	 * Pasek przewijania pokazujący postęp odtwarzania. Udostępnia on również możliwość przewijania odtwarzacza do dowolnego miejsca.  
+	 * Pasek przewijania pokazujący postęp odtwarzania. Udostępnia on również możliwość przewijania odtwarzacza do dowolnego miejsca.
 	 */
 	private SeekBar seekBar;
-	
+
 	/**
 	 * Pole tekstowe wyświetlające łańcuch znaków zawierający długość pliku multimedialnego wyrażoną takiej samej notacji jakiej używa MPlayer czyli <code>godziny:minuty:sekundy</code>.
 	 */
 	private TextView timeLengthTextView;
-	
+
 	/**
 	 * Pole tekstowe wyświetlające łańcuch znaków zawierający czas, wyrażony w notacji używanej przez odtwarzacz MPlayer (<code>godziny:minuty:sekundy</code>),
 	 * który upłynął od początku pliku multimedialnego do miejsca obecnie odtwarzanego.
@@ -153,31 +149,31 @@ public class RemoteControl extends Activity{
 	 * Przycisk po naciśnięciu, którego do odtwarzacza MPlayer zostanie wysłane polecenie <code>pausing_keep pause</code> nakazujące wstrzymanie odtwarzacza.
 	 */
 	private Button pauseButton;
-	
+
 	/**
-	 * Zmienna logiczna przechowująca informacje jaką ikonę wyświetla przycisk <code>pauseButon</code>. 
-	 * <code>True</code> w przypadku ikony symbolizującej polecenie wstrzymania odtwarzania, <code>False</code> dla ikony symbolizującej polecenie wznowienia odtwarzania. 
+	 * Zmienna logiczna przechowująca informacje jaką ikonę wyświetla przycisk <code>pauseButon</code>.
+	 * <code>True</code> w przypadku ikony symbolizującej polecenie wstrzymania odtwarzania, <code>False</code> dla ikony symbolizującej polecenie wznowienia odtwarzania.
 	 */
 	private Boolean showingPlayButtonboolean = false;
-	
+
 	/**
 	 * Interfejs służący do przechowywania preferencji, w tym przypadku stanu GUI aktywności.
-	 * @see android.content.SharedPreferences  
+	 * @see android.content.SharedPreferences
 	 */
 	private SharedPreferences sharedPreferencesForActivityRemotControl;		//for saving UI persistant state
-	
+
 	/**
 	 * <code>Handler</code> służący do przekazywania wiadomości z wątku <code>readProgressThread</code> do głównego wątku aplikacji (<code>UI thread</code>) zarządzającego GUI aktywności <code>RemoteControl</code>.
 	 * @see android.os.Handler
 	 */
 	private Handler progressHandler;
-	
+
 	/**
 	 * <code>Handler</code> służący do przekazywania wiadomości z wątku <code>readTimeLengthThread</code> do głównego wątku aplikacji (<code>UI thread</code>) zarządzającego GUI aktywności <code>RemoteControl</code>.
 	 * @see android.os.Handler
 	 */
 	private Handler timeLengthTextViewUpdateHandler;
-	
+
 	/**
 	 * <code>Handler</code> służący do przekazywania wiadomości z wątku <code>readTimePositionThread</code> do głównego wątku aplikacji (<code>UI thread</code>) zarządzającego GUI aktywności <code>RemoteControl</code>.
 	 * @see android.os.Handler
@@ -188,7 +184,7 @@ public class RemoteControl extends Activity{
 	 * Służy do zarządzania Lock Screen' em.
 	 */
 	private KeyguardManager keyguardManager;
-	
+
 	/**
 	 * Służy do zarządzania Lock Screen' em.
 	 */
@@ -240,10 +236,10 @@ public class RemoteControl extends Activity{
 			finish();
 		}
 	};
-	
+
 	/**Metoda wywoływana przez system Android przy starcie aktywności.
 	 * Wczytuje definicje GUI z pliku XML. Definiuje akcje wywoływane poprzez interakcji użytkownika z graficznym interfejsem użytkownika aktywności.
-	 * Definiuje <code>progressHandler</code>, <code>timeLengthTextViewUpdateHandler</code>, <code>timePositionUpdateHandler</code>. 
+	 * Definiuje <code>progressHandler</code>, <code>timeLengthTextViewUpdateHandler</code>, <code>timePositionUpdateHandler</code>.
 	 * @see android.app.Activity#onCreate(android.os.Bundle)
 	 */
 
@@ -259,31 +255,31 @@ public class RemoteControl extends Activity{
 		 Log.v(TAG, "file_to_play przekazane przez intent z ConnectAndPlayService: " + fileToPlayString);
 		 Log.v(TAG, "absolute_path przekazane przez intent z ServicePlayAFile: " + absolutePathString);
 
-	     
+
 	     	//gui
 	     setContentView(R.layout.layout_for_remotecontrol);
-	    	     
+
     	 final Vibrator mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-    	 
+
     	 keyguardManager = (KeyguardManager)getSystemService(Activity.KEYGUARD_SERVICE);
     	 lock = keyguardManager.newKeyguardLock(KEYGUARD_SERVICE);
-	     
+
 	     Button fullscreenButton = (Button) findViewById(R.id.fullscreean_button);
 	     fullscreenButton.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 					if( mBound == true ) {
 						mConnectAndPlayService.sendCommand("echo pausing_keep_force vo_fullscreen > fifofile");
 						mVibrator.vibrate(50);
 					}
-				
+
 			}
 	     });
 
 	     Button stopButton = (Button) findViewById(R.id.stop_button);
 	     stopButton.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 					//askMplayerThread.interrupt();
@@ -295,7 +291,7 @@ public class RemoteControl extends Activity{
 
 
 				}
-				
+
 			}
 		 });
 
@@ -325,14 +321,14 @@ public class RemoteControl extends Activity{
 
 			}
 		});
-	     
+
 	     pauseButton = (Button) findViewById(R.id.pause_button);
 	     /*
 	     sharedPreferencesForActivityRemotControl = getSharedPreferences("RemoteControl_activity_state", 0);
 	     showingPlayButtonboolean = sharedPreferencesForActivityRemotControl.getBoolean("showing_play_button", false);
     	 */
 	     pauseButton.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				if( mBound == true ) {
@@ -368,7 +364,7 @@ public class RemoteControl extends Activity{
 
 	     Button step10SecondBackwardButton = (Button) findViewById(R.id.step_10_second_backward_button);
 	     step10SecondBackwardButton.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				if( mBound == true ) {
@@ -378,9 +374,9 @@ public class RemoteControl extends Activity{
 				}
 			}
 		 });
-	     
+
 	     seekBar = (SeekBar) findViewById(R.id.seekBar);
-	 
+
 	     seekBar.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 
 			 @Override
@@ -410,9 +406,9 @@ public class RemoteControl extends Activity{
 				 }
 			 }
 		 });
-	     
+
 		 timePositionTextView = (TextView) findViewById(R.id.time_position_textView);
-			     
+
 		 timeLengthTextView = (TextView) findViewById(R.id.time_length_textView);
 
 		 nowPlayFileNameTextView = (TextView) findViewById(R.id.now_play_textView);
@@ -427,8 +423,8 @@ public class RemoteControl extends Activity{
 		         //int state = msg.arg2;
 		         seekBar.setProgress(progress);
 		     };
-		 }; 
-	     
+		 };
+
 		timeLengthTextViewUpdateHandler = new Handler() {
 		    public void handleMessage(Message msg) {
 		        timeLengthInSecondsint = msg.arg1;
@@ -441,16 +437,16 @@ public class RemoteControl extends Activity{
 		        	timeLengthMPlayerLikeString = hours + ":0" + minuts + ":0" + seconds;
 		        }else if (minuts > 10 && seconds > 10){
 		        	timeLengthMPlayerLikeString = hours + ":" + minuts + ":" + seconds;
-		        }else if (minuts > 10 && seconds < 10){	
+		        }else if (minuts > 10 && seconds < 10){
 		        	timeLengthMPlayerLikeString = hours + ":" + minuts + ":0" + seconds;
 		        }
 		        Log.v(TAG, "timeLength in timeLengthUpdateHandler is : " + timeLengthMPlayerLikeString);
 		        timeLengthTextView.setText(timeLengthMPlayerLikeString);
 
-		        
+
 		    };
 		};
-		
+
 		timePositionUpdateHandler = new Handler() {
 	        public void handleMessage(Message msg) {
 	        	timePositionInSecondsint = msg.arg1;
@@ -463,14 +459,14 @@ public class RemoteControl extends Activity{
 	            	timePositionMPlayerLikeString = hours + ":0" + minuts + ":0" + seconds;
 	            }else if (minuts > 10 && seconds > 10){
 	            	timePositionMPlayerLikeString = hours + ":" + minuts + ":" + seconds;
-	            }else if (minuts > 10 && seconds < 10){	
+	            }else if (minuts > 10 && seconds < 10){
 	            	timePositionMPlayerLikeString = hours + ":" + minuts + ":0" + seconds;
 	            }
-	            
+
 	            Log.v(TAG, "timePositionInSecondsMPlayerLikeString is : " + timePositionMPlayerLikeString);
 	            timePositionTextView.setText(timePositionMPlayerLikeString);
 			};
-		}; 
+		};
 	}
 
 
@@ -507,7 +503,7 @@ public class RemoteControl extends Activity{
 	}
 
 	/**
-	 * Metoda wywoływana przez system Android przy wznawianiu wyświetlania aktywności. 
+	 * Metoda wywoływana przez system Android przy wznawianiu wyświetlania aktywności.
 	 * Uruchamia wątki <code>askMplayerThread</code>, <code>readTimeLengthThread</code>, <code>readTimePositionThread</code>, <code>readProgressThread</code>.
 	 * Na podstawie zmiennej <code>showingPlayButtonboolean</code>  ustawia ikonę wyświetlaną przez przycisk <code>pauseButton</code>.
 	 * @see android.app.Activity#onResume()
@@ -515,10 +511,10 @@ public class RemoteControl extends Activity{
 	@Override
     protected void onResume() {
         super.onResume();
-        
-        askMplayerThread = new Thread(new AskMplayerRunnable()); 
+
+        askMplayerThread = new Thread(new AskMplayerRunnable());
         askMplayerThread.start();
-        
+
 	    readTimeLengthThread = new Thread(new ReadTimeLengthRunnable(timeLengthTextViewUpdateHandler));
 	    readTimeLengthThread.start();
 
@@ -527,7 +523,7 @@ public class RemoteControl extends Activity{
 
         readProgressThread = new Thread(new ReadProgressRunnable(progressHandler));
 	    readProgressThread.start();
-	    
+
 	    	// Restore preferences
 	 	if (isMyServiceRunning() == false)
 	 		finish();
@@ -541,12 +537,12 @@ public class RemoteControl extends Activity{
    	 		//wyłącza Lock Screen
    	 	//lock.disableKeyguard();	//disable because error in android > 5.0, when user launch activity by notification on lock screen a back stack is broken, https://code.google.com/p/android/issues/detail?id=158505
 	}
-	
-	
-    /** 
+
+
+    /**
      * Metoda wywoływana przez system Android, kiedy aktywność przestaje być wyświetlana na ekranie urządzenia.
      * Zatrzymuje wątki <code>askMplayerThread</code>, <code>readTimeLengthThread</code>, <code>readTimePositionThread</code>, <code>readProgressThread</code>.
-     * Zapisuje za pomocą interfejsu <code>sharedPreferencesForActivityRemotControl</code> informacje jaką ikonę wyświetla przycisk <code>pauseButton</code>. 
+     * Zapisuje za pomocą interfejsu <code>sharedPreferencesForActivityRemotControl</code> informacje jaką ikonę wyświetla przycisk <code>pauseButton</code>.
      * @see android.app.Activity#onPause()
      */
     @Override
@@ -564,7 +560,7 @@ public class RemoteControl extends Activity{
         editor.commit();
         */
         //absolutePathString = null;
-        
+
         	//włącza Lock Screen
         //lock.reenableKeyguard(); //disable because error in android > 5.0, when user launch activity by notification on lock screen a back stack is broken, https://code.google.com/p/android/issues/detail?id=158505
     }
@@ -579,9 +575,9 @@ public class RemoteControl extends Activity{
 	    inflater.inflate(R.menu.menu_for_remote_control, menu);
 	    return true;
 	}
-	
+
     /**
-     * Metoda wywoływana przez system Android w reakcji na wybranie pozycji w menu aktywności. Służy do definiowania akcji, np. wyświetlenie okna dialogowego, wywoływanych po wybraniu konkretnej pozycji menu aktywności. 
+     * Metoda wywoływana przez system Android w reakcji na wybranie pozycji w menu aktywności. Służy do definiowania akcji, np. wyświetlenie okna dialogowego, wywoływanych po wybraniu konkretnej pozycji menu aktywności.
      * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
      */
 	@Override
@@ -609,8 +605,8 @@ public class RemoteControl extends Activity{
 	*/
 
 	/**
-	 * Metoda wywoływana w reakcji na wciśniecie, któregoś z przycisków fizycznych urządzenia. 
-	 * W tym wypadku definiuje akcje wykonywane, kiedy użytkownik wciśnie przycisk pogłaśniania i przyciszania.  
+	 * Metoda wywoływana w reakcji na wciśniecie, któregoś z przycisków fizycznych urządzenia.
+	 * W tym wypadku definiuje akcje wykonywane, kiedy użytkownik wciśnie przycisk pogłaśniania i przyciszania.
 	 * @see android.app.Activity#onKeyDown(int, android.view.KeyEvent)
 	 */
 	@Override
@@ -657,7 +653,7 @@ public class RemoteControl extends Activity{
 
 	/**
 	 * Klasa reprezentująca komendę, którą można wykonać np. w oddzielnym wątku.
-	 * Wątek utworzony z klasy <code>AskMplayerRunnable</code> implementującej interfejs <code>Runnable</code>, wysyła do Mplayer' a polecenia <code>get_time_length</code>, <code>get_time_pos</code> i <code>get_percent_pos</code>.  
+	 * Wątek utworzony z klasy <code>AskMplayerRunnable</code> implementującej interfejs <code>Runnable</code>, wysyła do Mplayer' a polecenia <code>get_time_length</code>, <code>get_time_pos</code> i <code>get_percent_pos</code>.
 	 * @author sokar
 	 *
 	 */
@@ -665,341 +661,248 @@ public class RemoteControl extends Activity{
 
 		@Override
 		public void run() {
-			
-			while (isMyServiceRunning() == true){
 
-				if (mBound == true) {
-					mConnectAndPlayService.sendCommand("echo pausing_keep_force get_time_length > fifofile");
-				}
+			while (true){
+				try{
 
+					if (mBound == true) {
+						mConnectAndPlayService.sendCommand("echo pausing_keep_force get_time_length > fifofile");
+					}
+					Thread.sleep(500);		//sleep() method check Thread.currentThread().isInterrupted() before actually sleep current thread and throw InterruptedException if someone call interrupt() before.
 
-				if (mBound == true) {
-					mConnectAndPlayService.sendCommand("echo pausing_keep_force get_time_pos > fifofile");
-				}
+					if (mBound == true) {
+						mConnectAndPlayService.sendCommand("echo pausing_keep_force get_time_pos > fifofile");
+					}
+					Thread.sleep(500);		//sleep() method check Thread.currentThread().isInterrupted() before actually sleep current thread and throw InterruptedException if someone call interrupt() before.
 
+					if (mBound == true) {
+						mConnectAndPlayService.sendCommand("echo pausing_keep_force get_percent_pos > fifofile");
+					}
+					Thread.sleep(500);		//sleep() method check Thread.currentThread().isInterrupted() before actually sleep current thread and throw InterruptedException if someone call interrupt() before.
 
-
-				try {
-            		Thread.sleep(500);
         		} catch (InterruptedException e) {
-                    Log.e("ERROR", "Thread Interrupted");
-                    break;
-                }
-
-				if (mBound == true) {
-					mConnectAndPlayService.sendCommand("echo pausing_keep_force get_percent_pos > fifofile");
-				}
-
-				try {
-            		Thread.sleep(500);
-        		} catch (InterruptedException e) {
-                    Log.e("ERROR", "Thread Interrupted");
-                    break;
+                    Log.e("ERROR", "AskMplayerThread Interrupted");
+                    break;	//to end while interrupt()
                 }
 
 			}
-			
+
 		}
-		
+
 	}
-	 
-	
+
+
 	/**
 	 * Klasa reprezentująca komendę, którą można wykonać np. w oddzielnym wątku.
 	 * Wątek utworzony z klasy <code>ReadTimeLengthRunnable</code> odczytuje z listy {@link com.mplayer_remote.ConnectAndPlayService#mplayerOutputArrayList}
-	 * odpowiedź od odtwarzacza <code>MPlayer</code> zawierającą informacje, wyrażoną w sekundach, o długości odtwarzanego pliku multimedialnego. 
-	 * Informacja ta poprzez <code>Handler</code> {@link RemoteControl#timeLengthTextViewUpdateHandler} jest przekazywana do głównego wątku aplikacji (<code>UI thread</code>). 
+	 * odpowiedź od odtwarzacza <code>MPlayer</code> zawierającą informacje, wyrażoną w sekundach, o długości odtwarzanego pliku multimedialnego.
+	 * Informacja ta poprzez <code>Handler</code> {@link RemoteControl#timeLengthTextViewUpdateHandler} jest przekazywana do głównego wątku aplikacji (<code>UI thread</code>).
 	 * @author sokar
 	 *
 	 */
-	private class ReadTimeLengthRunnable implements Runnable {
+	private static class ReadTimeLengthRunnable implements Runnable {
 		private Handler mHandler;
         private String messageToSendString;
-		private String mplayerAnswerString = " ";
-		private String lastMplayerAnswerString = " ";
-		private boolean isThisAnswerNewboolean = true;
-		
+		//private String mplayerAnswerString = " ";
+		//private String lastMplayerAnswerString = " ";
+		//private boolean isThisAnswerNewboolean = true;
+
         public ReadTimeLengthRunnable(Handler h) {
 			mHandler = h;
 		}
 
 		@Override
 		public void run() {
-			try{
-				while (ConnectAndPlayService.mplayerOutputArrayList.isEmpty() == true){ 		//waiting for mplayer start
-	            	Thread.sleep(100);
-        		}
 
-				while (isMyServiceRunning() == true ) {
+			while (true) {	//until interrupt in await
 
-					ConnectAndPlayService.mplayerOutputArrayListLock.lock();
-			        try
-			        {
+				ConnectAndPlayService.mplayerOutputArrayListLock.lock();
+				try {
+					while (ConnectAndPlayService.mplayerOutputArrayList.isEmpty() == true || !ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1).contains("ANS_LENGTH")) {
+						//nothing to do so await for new MPlayer answer
+						ConnectAndPlayService.newMplayerOutputCondition.await();
+					}
 
-			        	mplayerAnswerString = ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1);
-						if (mplayerAnswerString.equals(lastMplayerAnswerString)){
-							isThisAnswerNewboolean = false;
-						}else{
-							isThisAnswerNewboolean = true;
+					String timeLengthString = ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1);
+					if (timeLengthString.contains(".") == true) {
+						int position = timeLengthString.lastIndexOf("=");
+						int dotPosition = timeLengthString.lastIndexOf(".");
+						messageToSendString = timeLengthString.substring(position + 1, dotPosition);
+						Message msg = mHandler.obtainMessage();
+						try {
+							msg.arg1 = Integer.parseInt(messageToSendString);        //mplayer sometime send weird output
+						} catch (java.lang.NumberFormatException e) {
+							break;
 						}
-
-						while (ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1).contains("ANS_LENGTH") == false || isThisAnswerNewboolean == false) {
-
-								ConnectAndPlayService.newMplayerOutputCondition.await();
-
-								mplayerAnswerString = ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1);
-								if (mplayerAnswerString.equals(lastMplayerAnswerString)){
-									isThisAnswerNewboolean = false;
-								}else{
-									isThisAnswerNewboolean = true;
-								}
-
-			        	}
-
-
-						String timeLengthString = ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1);
-						if (timeLengthString.contains(".") == true){
-							int position = timeLengthString.lastIndexOf("=");
-							int dotPosition = timeLengthString.lastIndexOf(".");
-							messageToSendString = timeLengthString.substring(position + 1, dotPosition);
-							Message msg = mHandler.obtainMessage();
-							try{
-				            msg.arg1 =  Integer.parseInt(messageToSendString);		//mplayer sometime send weird output
-							}catch (java.lang.NumberFormatException e){
-								break;
-							}
-				            mHandler.sendMessage(msg);
-						}else{
-							int position = timeLengthString.lastIndexOf("=");
-							messageToSendString = timeLengthString.substring(position + 1);
-							Message msg = mHandler.obtainMessage();
-							try{
-					            msg.arg1 =  Integer.parseInt(messageToSendString);		//mplayer sometime send weird output
-							}catch (java.lang.NumberFormatException e){
-								break;
-							}
-				            mHandler.sendMessage(msg);
+						mHandler.sendMessage(msg);
+					} else {
+						int position = timeLengthString.lastIndexOf("=");
+						messageToSendString = timeLengthString.substring(position + 1);
+						Message msg = mHandler.obtainMessage();
+						try {
+							msg.arg1 = Integer.parseInt(messageToSendString);        //mplayer sometime send weird output
+						} catch (java.lang.NumberFormatException e) {
+							break;
 						}
+						mHandler.sendMessage(msg);
+					}
 
-						lastMplayerAnswerString = ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1);
+					ConnectAndPlayService.newMplayerOutputCondition.await();    //this Mplayer answer consumed so await for new MPlayer answer
 
-			        }
-					finally
-		            {
-		            	ConnectAndPlayService.mplayerOutputArrayListLock.unlock();
-		            }
-
-					Log.v(TAG, "readTimeLengthThread wciąż żyje");
-					//ConnectToServer.sendCommand("echo pausing_keep get_time_length > fifofile");
+				} catch (InterruptedException e) {
+					Log.e("ERROR", "readTimeLengthThread Interrupted");
+					break;	//to end while interrupt()
+				} finally {
+					ConnectAndPlayService.mplayerOutputArrayListLock.unlock();
 				}
-				Log.v(TAG, "readTimeLengthThread umarł");
 			}
-			catch (InterruptedException e)
-	    	{
-	    		// TODO Auto-generated catch block
-				e.printStackTrace();
-	    	}
+
 		}
 	}
-	
+
 	/**
 	 * Klasa reprezentująca komendę, którą można wykonać np. w oddzielnym wątku.
 	 * Wątek utworzony z klasy <code>ReadTimePositionRunnable</code> odczytuje z listy {@link com.mplayer_remote.ConnectAndPlayService#mplayerOutputArrayList}
-	 * odpowiedź od odtwarzacza <code>MPlayer</code> zawierającą informacje, wyrażoną w sekundach, o pozycji, w której znajduje się odtwarzanie pliku multimedialnego. 
-	 * Informacja ta poprzez <code>Handler</code> {@link RemoteControl#timePositionUpdateHandler} jest przekazywana do głównego wątku aplikacji (<code>UI thread</code>). 
+	 * odpowiedź od odtwarzacza <code>MPlayer</code> zawierającą informacje, wyrażoną w sekundach, o pozycji, w której znajduje się odtwarzanie pliku multimedialnego.
+	 * Informacja ta poprzez <code>Handler</code> {@link RemoteControl#timePositionUpdateHandler} jest przekazywana do głównego wątku aplikacji (<code>UI thread</code>).
 	 * @author sokar
 	 *
 	 */
-	private class ReadTimePositionRunnable implements Runnable{
+	private static class ReadTimePositionRunnable implements Runnable{
 		private Handler mHandler;
 		private String messageToSendString;
 		private String mplayerAnswerString = " ";
-		private String lastMplayerAnswerString = " ";
-		private boolean isThisAnswerNewboolean = true;
-		
+
         public ReadTimePositionRunnable(Handler h) {
 			mHandler = h;
 		}
 		@Override
 		public void run() {
-			try{
 
-				while (ConnectAndPlayService.mplayerOutputArrayList.isEmpty() == true){ 		//waiting for mplayer start
-            		Thread.sleep(100);
+			while (true) {	//until interrupt in await
+
+				ConnectAndPlayService.mplayerOutputArrayListLock.lock();
+				try{
+
+					while (ConnectAndPlayService.mplayerOutputArrayList.isEmpty() == true || !ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1).contains("ANS_TIME_POSITION")) {
+						//nothing to do so await for new MPlayer answer
+						ConnectAndPlayService.newMplayerOutputCondition.await();
+					}
+
+					String timePositionString = ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1);
+
+					if (timePositionString.contains(".") == true){
+						int position = timePositionString.lastIndexOf("=");
+						int dotPositionint = timePositionString.lastIndexOf(".");
+						messageToSendString = timePositionString.substring(position + 1, dotPositionint);
+
+						if (messageToSendString.length() > 7 || messageToSendString.contains("-")){		//mplayer sometime send weird output
+							Log.v("TAG", "MPlayer send weird output");
+						}else{
+							Message msg = mHandler.obtainMessage();
+							try{
+								msg.arg1 =  Integer.parseInt(messageToSendString);		//mplayer sometime send weird output
+							}catch (java.lang.NumberFormatException e){
+								break;
+							}
+							mHandler.sendMessage(msg);
+						}
+					}else{
+						int position = timePositionString.lastIndexOf("=");
+						messageToSendString = timePositionString.substring(position + 1);
+
+						if (messageToSendString.length() > 7 || messageToSendString.contains("-")){		//mplayer sometime send weird output
+							Log.v("TAG", "MPlayer send weird output");
+						}else{
+							Message msg = mHandler.obtainMessage();
+							try{
+								msg.arg1 =  Integer.parseInt(messageToSendString);		//mplayer sometime send weird output
+							}catch (java.lang.NumberFormatException e){
+								break;
+							}
+							mHandler.sendMessage(msg);
+						}
+					}
+
+					ConnectAndPlayService.newMplayerOutputCondition.await();	//this Mplayer answer consumed so await for new MPlayer answer
+
+				}catch (InterruptedException e){
+					Log.e("ERROR", "readTimePositionThread Interrupted");
+					break; //to end while interrupt()
+				}
+				finally{
+					ConnectAndPlayService.mplayerOutputArrayListLock.unlock();
 				}
 
-				while (isMyServiceRunning() == true ) {
-					//ConnectToServer.sendCommand("echo pausing_keep_force get_time_pos > fifofile");
-
-					ConnectAndPlayService.mplayerOutputArrayListLock.lock();
-			        try
-			        {
-			        	mplayerAnswerString = ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1);
-						if (mplayerAnswerString.equals(lastMplayerAnswerString)){
-							isThisAnswerNewboolean = false;
-						}else{
-							isThisAnswerNewboolean = true;
-						}
-
-
-						while (ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1).contains("ANS_TIME_POSITION") == false || isThisAnswerNewboolean == false) {
-
-								ConnectAndPlayService.newMplayerOutputCondition.await();
-
-								mplayerAnswerString = ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1);
-								if (mplayerAnswerString.equals(lastMplayerAnswerString)){
-									isThisAnswerNewboolean = false;
-								}else{
-									isThisAnswerNewboolean = true;
-								}
-
-						}
-
-						String timePositionString = ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1);
-
-						if (timePositionString.contains(".") == true){
-							int position = timePositionString.lastIndexOf("=");
-							int dotPositionint = timePositionString.lastIndexOf(".");
-							messageToSendString = timePositionString.substring(position + 1, dotPositionint);
-
-							if (messageToSendString.length() > 7 || messageToSendString.contains("-")){		//mplayer sometime send weird output
-								Log.v("TAG", "MPlayer send weird output");
-							}else{
-								Message msg = mHandler.obtainMessage();
-								try{
-						            msg.arg1 =  Integer.parseInt(messageToSendString);		//mplayer sometime send weird output
-								}catch (java.lang.NumberFormatException e){
-									break;
-								}
-					            mHandler.sendMessage(msg);
-							}
-						}else{
-							int position = timePositionString.lastIndexOf("=");
-							messageToSendString = timePositionString.substring(position + 1);
-
-							if (messageToSendString.length() > 7 || messageToSendString.contains("-")){		//mplayer sometime send weird output
-								Log.v("TAG", "MPlayer send weird output");
-							}else{
-								Message msg = mHandler.obtainMessage();
-								try{
-						            msg.arg1 =  Integer.parseInt(messageToSendString);		//mplayer sometime send weird output
-								}catch (java.lang.NumberFormatException e){
-									break;
-								}
-					            mHandler.sendMessage(msg);
-							}
-						}
-
-						lastMplayerAnswerString = ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1);
-
-
-			        }
-			    	finally
-		            {
-		            	ConnectAndPlayService.mplayerOutputArrayListLock.unlock();
-		            }
-
-
-					Log.v(TAG, "readTimePositionThread  wciąż żyje");
-
-				}
-				Log.v(TAG, "readTimePositionThread umarł");
 			}
-			catch (InterruptedException e)
-        	{
-        		// TODO Auto-generated catch block
-				e.printStackTrace();
-        	}
+
 		}
-			
-		
-		
+
+
+
 	}
-	
+
 	/**
 	 * Klasa reprezentująca komendę, którą można wykonać np. w oddzielnym wątku.
 	 * Wątek utworzony z klasy <code>ReadProgressRunnable</code> odczytuje z listy {@link com.mplayer_remote.ConnectAndPlayService#mplayerOutputArrayList}
-	 * odpowiedź od odtwarzacza <code>MPlayer</code> zawierającą informacje, wyrażoną w procentach, o pozycji, w której znajduje się odtwarzanie pliku multimedialnego. 
-	 * Informacja ta poprzez <code>Handler</code> {@link RemoteControl#progressHandler} jest przekazywana do głównego wątku aplikacji (<code>UI thread</code>). 
+	 * odpowiedź od odtwarzacza <code>MPlayer</code> zawierającą informacje, wyrażoną w procentach, o pozycji, w której znajduje się odtwarzanie pliku multimedialnego.
+	 * Informacja ta poprzez <code>Handler</code> {@link RemoteControl#progressHandler} jest przekazywana do głównego wątku aplikacji (<code>UI thread</code>).
 	 * @author sokar
 	 *
 	 */
-	private class ReadProgressRunnable implements Runnable {
+	private static class ReadProgressRunnable implements Runnable {
 		private Handler mHandler;
 		private String messageToSendString;
-		private String mplayerAnswerString = " ";
-		private String lastMplayerAnswerString = " ";
-		private boolean isThisAnswerNewboolean = true;
-		
+
         ReadProgressRunnable(Handler h) {
             mHandler = h;
         }
-       
+
         public void run() {
-        	try {
-	            while (ConnectAndPlayService.mplayerOutputArrayList.isEmpty() == true){ 		//waiting for mplayer start
-	            	Thread.sleep(100);
-	        	}
 
-	            while (isMyServiceRunning() == true) {
+			while (true) {
 
-					ConnectAndPlayService.mplayerOutputArrayListLock.lock();
-			        try
-			        {
-			        	mplayerAnswerString = ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1);
-						if (mplayerAnswerString.equals(lastMplayerAnswerString)){
-							isThisAnswerNewboolean = false;
-						}else{
-							isThisAnswerNewboolean = true;
-						}
-
-						while (ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1).contains("ANS_PERCENT_POSITION") == false || isThisAnswerNewboolean == false) {
-
-								ConnectAndPlayService.newMplayerOutputCondition.await();
-
-								mplayerAnswerString = ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1);
-								if (mplayerAnswerString.equals(lastMplayerAnswerString)){
-									isThisAnswerNewboolean = false;
-								}else{
-									isThisAnswerNewboolean = true;
-								}
-						}
-						String last_mplayer_output_with_ANS_PERCENT_POSITION = ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1);
-						Log.v(TAG, "aktualny procent odtwarzania " + ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size()-1));
+				ConnectAndPlayService.mplayerOutputArrayListLock.lock();
+				try
+				{
+					while (ConnectAndPlayService.mplayerOutputArrayList.isEmpty() == true || !ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1).contains("ANS_PERCENT_POSITION")) {
+						//nothing to do so await for new MPlayer answer
+						ConnectAndPlayService.newMplayerOutputCondition.await();
+					}
+					String last_mplayer_output_with_ANS_PERCENT_POSITION = ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1);
+					Log.v(TAG, "aktualny procent odtwarzania " + ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size()-1));
 
 
-				        int position = last_mplayer_output_with_ANS_PERCENT_POSITION.lastIndexOf("=");
-				        //Log.v(TAG, "position is: " + position);
-			            messageToSendString = last_mplayer_output_with_ANS_PERCENT_POSITION.substring(position + 1);
-			            Log.v(TAG, "message_to_send after parsing to int is: " + messageToSendString);
+					int position = last_mplayer_output_with_ANS_PERCENT_POSITION.lastIndexOf("=");
+					//Log.v(TAG, "position is: " + position);
+					messageToSendString = last_mplayer_output_with_ANS_PERCENT_POSITION.substring(position + 1);
+					Log.v(TAG, "message_to_send after parsing to int is: " + messageToSendString);
 
-			            Message msg = mHandler.obtainMessage(WHAT_FOR_PROGRESS_MESSAGE);
-			            try{
-				            msg.arg1 =  Integer.parseInt(messageToSendString);		//mplayer sometime send weird output
-						}catch (java.lang.NumberFormatException e){
-							break;
-						}
+					Message msg = mHandler.obtainMessage(WHAT_FOR_PROGRESS_MESSAGE);
+					try{
+						msg.arg1 =  Integer.parseInt(messageToSendString);		//mplayer sometime send weird output
+					}catch (java.lang.NumberFormatException e){
+						break;
+					}
 
-			            mHandler.sendMessageDelayed(msg, 1000);
+					mHandler.sendMessageDelayed(msg, 1000);
 
-			            lastMplayerAnswerString = ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1);
+					ConnectAndPlayService.newMplayerOutputCondition.await();	//this Mplayer answer consumed so await for new MPlayer answer
 
-			        }
-		            finally
-		            {
-		            	ConnectAndPlayService.mplayerOutputArrayListLock.unlock();
-		            }
+				}catch (InterruptedException e) {
+					Log.e("ERROR", "readProgressThread Interrupted");
+					break; //to end while interrupt()
 				}
-        	}
-        	catch (InterruptedException e)
-        	{
-        		// TODO Auto-generated catch block
-				e.printStackTrace();
-        	}
+				finally
+				{
+					ConnectAndPlayService.mplayerOutputArrayListLock.unlock();
+				}
+			}
 		}
-    }
-    
 
-    
+    }
+
+
+
 }
 
