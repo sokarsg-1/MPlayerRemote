@@ -682,7 +682,7 @@ public class RemoteControl extends Activity{
 
         		} catch (InterruptedException e) {
                     Log.e("ERROR", "AskMplayerThread Interrupted");
-                    break;	//to end while interrupt()
+                    return;	//to end while interrupt()
                 }
 
 			}
@@ -718,7 +718,7 @@ public class RemoteControl extends Activity{
 
 				ConnectAndPlayService.mplayerOutputArrayListLock.lock();
 				try {
-					while (ConnectAndPlayService.mplayerOutputArrayList.isEmpty() == true || !ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1).contains("ANS_LENGTH")) {
+					while (ConnectAndPlayService.mplayerOutputArrayList.isEmpty() || !ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1).contains("ANS_LENGTH")) {
 						//nothing to do so await for new MPlayer answer
 						ConnectAndPlayService.newMplayerOutputCondition.await();
 					}
@@ -751,7 +751,7 @@ public class RemoteControl extends Activity{
 
 				} catch (InterruptedException e) {
 					Log.e("ERROR", "readTimeLengthThread Interrupted");
-					break;	//to end while interrupt()
+					return;	//to end while interrupt()
 				} finally {
 					ConnectAndPlayService.mplayerOutputArrayListLock.unlock();
 				}
@@ -784,7 +784,7 @@ public class RemoteControl extends Activity{
 				ConnectAndPlayService.mplayerOutputArrayListLock.lock();
 				try{
 
-					while (ConnectAndPlayService.mplayerOutputArrayList.isEmpty() == true || !ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1).contains("ANS_TIME_POSITION")) {
+					while (ConnectAndPlayService.mplayerOutputArrayList.isEmpty() || !ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1).contains("ANS_TIME_POSITION")) {
 						//nothing to do so await for new MPlayer answer
 						ConnectAndPlayService.newMplayerOutputCondition.await();
 					}
@@ -828,7 +828,7 @@ public class RemoteControl extends Activity{
 
 				}catch (InterruptedException e){
 					Log.e("ERROR", "readTimePositionThread Interrupted");
-					break; //to end while interrupt()
+					return; //to end while interrupt()
 				}
 				finally{
 					ConnectAndPlayService.mplayerOutputArrayListLock.unlock();
@@ -865,18 +865,14 @@ public class RemoteControl extends Activity{
 				ConnectAndPlayService.mplayerOutputArrayListLock.lock();
 				try
 				{
-					while (ConnectAndPlayService.mplayerOutputArrayList.isEmpty() == true || !ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1).contains("ANS_PERCENT_POSITION")) {
+					while (ConnectAndPlayService.mplayerOutputArrayList.isEmpty() || !ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1).contains("ANS_PERCENT_POSITION")) {
 						//nothing to do so await for new MPlayer answer
 						ConnectAndPlayService.newMplayerOutputCondition.await();
 					}
+
 					String last_mplayer_output_with_ANS_PERCENT_POSITION = ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size() - 1);
-					Log.v(TAG, "aktualny procent odtwarzania " + ConnectAndPlayService.mplayerOutputArrayList.get(ConnectAndPlayService.mplayerOutputArrayList.size()-1));
-
-
 					int position = last_mplayer_output_with_ANS_PERCENT_POSITION.lastIndexOf("=");
-					//Log.v(TAG, "position is: " + position);
 					messageToSendString = last_mplayer_output_with_ANS_PERCENT_POSITION.substring(position + 1);
-					Log.v(TAG, "message_to_send after parsing to int is: " + messageToSendString);
 
 					Message msg = mHandler.obtainMessage(WHAT_FOR_PROGRESS_MESSAGE);
 					try{
@@ -884,14 +880,13 @@ public class RemoteControl extends Activity{
 					}catch (java.lang.NumberFormatException e){
 						break;
 					}
-
 					mHandler.sendMessageDelayed(msg, 1000);
 
 					ConnectAndPlayService.newMplayerOutputCondition.await();	//this Mplayer answer consumed so await for new MPlayer answer
 
 				}catch (InterruptedException e) {
 					Log.e("ERROR", "readProgressThread Interrupted");
-					break; //to end while interrupt()
+					return; //to end while interrupt()
 				}
 				finally
 				{
