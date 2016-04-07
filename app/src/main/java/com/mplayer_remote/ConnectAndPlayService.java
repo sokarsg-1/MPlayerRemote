@@ -65,17 +65,13 @@ public class ConnectAndPlayService extends Service {
     /**
      * Zamek <a href=''http://docs.oracle.com/javase/7/docs/api/''> Lock </a> umożliwiający kontrolowanie dostępu przez wątki aplikacji do współdzielonej listy {@link com.mplayer_remote.ServicePlayAFile#mplayerOutputArrayList}.
      */
-    protected static Lock mplayerOutputArrayListLock = new ReentrantLock(true);		//true means this is a fair lock
+    protected static Lock mplayerOutputArrayListLock = new ReentrantLock(false);		//true means this is a fair lock
 
     /**
      * Warunek <a href=''http://docs.oracle.com/javase/7/docs/api/''>Condition </a> informujący wątki o pojawieniu się nowych danych na liście {@link com.mplayer_remote.ServicePlayAFile#mplayerOutputArrayList}.
      */
     protected static Condition newMplayerOutputCondition = mplayerOutputArrayListLock.newCondition();
 
-    /**
-     * Zamek <a href=''http://docs.oracle.com/javase/7/docs/api/''> Lock </a> umożliwiający kontrolowanie dostępu przez wątki aplikacji do pliku fifofile znajdującego się na serwerze SSH.
-     */
-    protected static Lock fifofileLock = new ReentrantLock(true);
     /**
      * SingleThreadExecutor for playing multiple file(in thread) one by one.
      */
@@ -99,11 +95,11 @@ public class ConnectAndPlayService extends Service {
      * NotificationManager
      */
     private NotificationManager mNotificationManager;
-    private int mId = 1;		//for notyfication
+    private int mId = 1;		//id for notyfication
 
     // Our handler for received Intents. This will be called whenever an Intent
     // with an action named "notyficationAction" is broadcasted.
-    private BroadcastReceiver mnotyficationActionMessageReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mynotyficationActionMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             // Get extra data included in the Intent
@@ -130,7 +126,7 @@ public class ConnectAndPlayService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {      //TODO place somewhere stopSelf()
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(mnotyficationActionMessageReceiver, new IntentFilter("ButtonActionInNotyficationClicked"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mynotyficationActionMessageReceiver, new IntentFilter("ButtonActionInNotyficationClicked"));
 
 
             //connecting to new SSH server so clean fields
@@ -156,7 +152,7 @@ public class ConnectAndPlayService extends Service {
         super.onDestroy();
         Log.v(TAG, "ConnectAndPlayService destroyed");
 
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mnotyficationActionMessageReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mynotyficationActionMessageReceiver);
 
     }
 
@@ -193,7 +189,7 @@ public class ConnectAndPlayService extends Service {
 
         es = Executors.newSingleThreadExecutor();
 
-        while (isfifofileExist() == false){
+        while (!isfifofileExist()){
             sendCommand("rm fifofile");
             sendCommand("mkfifo fifofile");
         }
@@ -228,7 +224,7 @@ public class ConnectAndPlayService extends Service {
             public void run() {
                 stopPlaying();
                 sendBroadcastReachEndOfPlaylist();
-                Log.v(TAG,"Reach end of playlist so stop RemoteControl");
+                Log.v(TAG, "Reach end of playlist so stop RemoteControl");
             }
         });
 
@@ -319,11 +315,13 @@ public class ConnectAndPlayService extends Service {
     private void stopPlayingPlayList(){
 
         es.shutdownNow();
+        sendCommand("pkill mplayer");   //kill now playing MPlayer instance
 
         try {
-            do {
-                sendCommand("pkill mplayer");
-            }while(es.awaitTermination(300, TimeUnit.MILLISECONDS) == false);   //false if timeout
+            while (es.awaitTermination(100, TimeUnit.MILLISECONDS) == false){   //false if timeout
+                Log.v(TAG, "es.awaitTermination(100, TimeUnit.MILLISECONDS) == false so pkill --signal 9 mplayer");
+                sendCommand("pkill --signal 9 mplayer");    //SIGKILL (9) – Kill signal. Use SIGKILL as a last resort to kill process. This will not save data or cleaning kill the process.
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
