@@ -604,6 +604,8 @@ public class RemoteControl extends Activity{
 	}
 	*/
 
+
+	///////////////////////////THIS MAST STAY IN ACTIVITY//////////////////////////////////////
 	/**
 	 * Metoda wywoływana w reakcji na wciśniecie, któregoś z przycisków fizycznych urządzenia.
 	 * W tym wypadku definiuje akcje wykonywane, kiedy użytkownik wciśnie przycisk pogłaśniania i przyciszania.
