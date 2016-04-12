@@ -2,11 +2,11 @@
 <items version="2" >
 
     <item
-        jar="/home/sokar/Android/Sdk/extras/android/m2repository/com/android/support/support-v4/19.0.1/support-v4-19.0.1.jar"
+        jar="/home/sokar/Android/Sdk/extras/android/m2repository/com/android/support/support-v4/19.1.0/support-v4-19.1.0.jar"
         jumboMode="false"
         revision="22.0.1"
-        sha1="587da9a481ffd341d2fa091704489b89845ddacd">
-        <dex dex="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/pre-dexed/debug/support-v4-19.0.1-a71f5325d9dea17a04f1af50780c50d3d8892dd8.jar" />
+        sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67">
+        <dex dex="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/pre-dexed/debug/support-v4-19.1.0-fd9dc4593bd7c9da74803a79f2f8dea72152e980.jar" />
     </item>
 
 </items>
