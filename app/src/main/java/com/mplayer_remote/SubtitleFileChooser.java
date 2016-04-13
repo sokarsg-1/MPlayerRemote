@@ -213,11 +213,11 @@ public class SubtitleFileChooser extends ListActivity{
 					mConnectAndPlayService.sendCommandAndWaitForExitStatus("echo pausing_keep sub_remove > fifofile");
 					mConnectAndPlayService.sendCommandAndWaitForExitStatus("echo pausing_keep sub_load " + "'" + subtitleFilePathWithBackslash + "'" + " > fifofile");
 					mConnectAndPlayService.sendCommandAndWaitForExitStatus("echo pausing_keep sub_file > fifofile");
-					Intent intent_start_RemoteControl = new Intent(getApplicationContext(), RemoteControl.class);
-					intent_start_RemoteControl.putExtra("absolute_path", absolute_path);
-					intent_start_RemoteControl.putExtra("file_to_play", file_to_play);
+					//Intent intent_start_RemoteControl = new Intent(getApplicationContext(), RemoteControl.class);
+					//intent_start_RemoteControl.putExtra("absolute_path", absolute_path);
+					//intent_start_RemoteControl.putExtra("file_to_play", file_to_play);
 					//intent_start_RemoteControl.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
-					startActivity(intent_start_RemoteControl);
+					//startActivity(intent_start_RemoteControl);
 					this.finish();
 				} else {
 					this.finish();
