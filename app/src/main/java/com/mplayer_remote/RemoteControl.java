@@ -18,8 +18,10 @@ MPlayer Remote
 
 package com.mplayer_remote;
 
+import android.app.ActionBar;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
+import android.app.FragmentTransaction;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -77,10 +79,12 @@ public class RemoteControl extends FragmentActivity implements RemoteControlFrag
         }
     };
 
-	static final int NUM_ITEMS = 2;
+	public static final int NUM_ITEMS = 2;
 
-	ViewPager mViewPager = null;
-	FragmentPagerAdapter myFragmentPagerAdapter = null;
+	private ViewPager mViewPager = null;
+	private FragmentPagerAdapter myFragmentPagerAdapter = null;
+
+	private ActionBar actionBar = null;
 
 	/**Metoda wywoływana przez system Android przy starcie aktywności.
 	 * Wczytuje definicje GUI z pliku XML. Definiuje akcje wywoływane poprzez interakcji użytkownika z graficznym interfejsem użytkownika aktywności.
@@ -101,9 +105,41 @@ public class RemoteControl extends FragmentActivity implements RemoteControlFrag
 		myFragmentPagerAdapter = new MyFragmentPagerAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.pager);
         Log.v(TAG, "mViewPager" + mViewPager.toString());
-        Log.v(TAG,"myFragmentPagerAdapter" + myFragmentPagerAdapter.toString());
+        Log.v(TAG, "myFragmentPagerAdapter" + myFragmentPagerAdapter.toString());
         mViewPager.setAdapter(myFragmentPagerAdapter);
+			//tabs
+		actionBar = getActionBar();
+		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		ActionBar.TabListener tabListener = new ActionBar.TabListener(){
+			@Override
+			public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+				mViewPager.setCurrentItem(tab.getPosition(),true);
+			}
 
+			@Override
+			public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+
+			}
+
+			@Override
+			public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+
+			}
+		};
+		mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener(){
+			@Override
+			public void onPageSelected(int position) {
+				actionBar.setSelectedNavigationItem(position);
+			}
+		});
+		ActionBar.Tab nowPlayingTab = actionBar.newTab();
+		nowPlayingTab.setText("NOWPLAYING");
+		nowPlayingTab.setTabListener(tabListener);
+		actionBar.addTab(nowPlayingTab);
+		ActionBar.Tab playlistTab = actionBar.newTab();
+		playlistTab.setText("PLAYLIST");
+		playlistTab.setTabListener(tabListener);
+		actionBar.addTab(playlistTab);
 	}
 
     @Override
@@ -192,6 +228,15 @@ public class RemoteControl extends FragmentActivity implements RemoteControlFrag
             }else {
                 return RemoteControlFragment.newInstance("dupa", "dupa");
             }
+		}
+
+		@Override
+		public CharSequence getPageTitle(int position) {
+			if (position == 0){
+				return "NOW PLAYING";
+			}else{
+				return "PLAYLIST";
+			}
 		}
 	}
 
