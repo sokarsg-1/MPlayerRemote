@@ -70,6 +70,6 @@
 
     <string name="text_for_toast_end_of_playlist">End of playlist</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_for_now_playing_tab">Now Playing</string>
+    <string name="title_for_playlist_tab">Playlist</string>
 </resources>

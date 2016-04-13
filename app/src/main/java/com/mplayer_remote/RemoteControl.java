@@ -44,7 +44,7 @@ import android.view.KeyEvent;
  * @author sokar
  * @see android.app.Activity
  */
-public class RemoteControl extends FragmentActivity implements RemoteControlFragment.OnFragmentInteractionListener{
+public class RemoteControl extends FragmentActivity implements RemoteControlFragment.OnFragmentInteractionListener, PlayListFragment.OnFragmentInteractionListener{
 
 		//w celach diagnostycznych nazwa logu dla tego Activity
 	private static final String TAG = RemoteControl.class.getSimpleName();
@@ -126,18 +126,18 @@ public class RemoteControl extends FragmentActivity implements RemoteControlFrag
 
 			}
 		};
-		mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener(){
+		mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
 			@Override
 			public void onPageSelected(int position) {
 				actionBar.setSelectedNavigationItem(position);
 			}
 		});
 		ActionBar.Tab nowPlayingTab = actionBar.newTab();
-		nowPlayingTab.setText("NOWPLAYING");
+		nowPlayingTab.setText(R.string.title_for_now_playing_tab);
 		nowPlayingTab.setTabListener(tabListener);
 		actionBar.addTab(nowPlayingTab);
 		ActionBar.Tab playlistTab = actionBar.newTab();
-		playlistTab.setText("PLAYLIST");
+		playlistTab.setText(R.string.title_for_playlist_tab);
 		playlistTab.setTabListener(tabListener);
 		actionBar.addTab(playlistTab);
 	}
@@ -226,18 +226,10 @@ public class RemoteControl extends FragmentActivity implements RemoteControlFrag
 			if(position == 0){
                 return RemoteControlFragment.newInstance(fileToPlayString, absolutePathString);
             }else {
-                return RemoteControlFragment.newInstance("dupa", "dupa");
+                return PlayListFragment.newInstance("dupa", "dupa");
             }
 		}
 
-		@Override
-		public CharSequence getPageTitle(int position) {
-			if (position == 0){
-				return "NOW PLAYING";
-			}else{
-				return "PLAYLIST";
-			}
-		}
 	}
 
 

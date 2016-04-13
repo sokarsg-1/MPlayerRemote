@@ -310,6 +310,16 @@ public class ConnectAndPlayService extends Service {
     }
 
     /**
+     * Play files from given index to end of playlist.
+     */
+    public void playPlayListFromIndex(int index){
+        List<String> localPlaylist;
+        stopPlayingPlayList();
+        localPlaylist = playListArrayList.subList(index,playListArrayList.size());
+        playASubPlayList(localPlaylist, absolutePathString);
+    }
+
+    /**
      * For using in playNextMedia() and playPreviousMedia()
      */
     private void stopPlayingPlayList(){
@@ -339,6 +349,13 @@ public class ConnectAndPlayService extends Service {
      */
     public String getAbsolutePathString(){
         return absolutePathString;
+    }
+
+    /**
+     * Return current playListArrayList
+     */
+    public List<String> getPlayListArrayList(){
+        return playListArrayList;
     }
 
     /**
