@@ -224,7 +224,6 @@ public class RemoteControlFragment extends Fragment {
         }
     };
 
-    // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "fileToPlay";
     private static final String ARG_PARAM2 = "absolutePath";
@@ -243,7 +242,6 @@ public class RemoteControlFragment extends Fragment {
      * @param absolutePathString Parameter 2.
      * @return A new instance of fragment RemoteControlFragment.
      */
-    // TODO: Rename and change types and number of parameters
     public static RemoteControlFragment newInstance(String fileToPlayString, String absolutePathString) {
         RemoteControlFragment fragment = new RemoteControlFragment();
         Bundle args = new Bundle();
@@ -260,6 +258,8 @@ public class RemoteControlFragment extends Fragment {
             fileToPlayString = getArguments().getString(ARG_PARAM1);
             absolutePathString = getArguments().getString(ARG_PARAM2);
         }
+
+        setHasOptionsMenu(true);
     }
 
     @Override
