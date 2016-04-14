@@ -4,7 +4,7 @@
     <item
         jar="/home/sokar/Android/Sdk/extras/android/m2repository/com/android/support/support-v4/19.1.0/support-v4-19.1.0.jar"
         jumboMode="false"
-        revision="22.0.1"
+        revision="23.0.1"
         sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67">
         <dex dex="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/pre-dexed/debug/support-v4-19.1.0-fd9dc4593bd7c9da74803a79f2f8dea72152e980.jar" />
     </item>

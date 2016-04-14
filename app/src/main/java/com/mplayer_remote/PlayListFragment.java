@@ -2,20 +2,26 @@ package com.mplayer_remote;
 
 import android.app.Activity;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ListFragment;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,12 +65,27 @@ public class PlayListFragment extends ListFragment {
                 String justFileName = fullFileName.substring(positionOfLastDash + 1);
                 filesNamePlayListList.add(justFileName);
             }
-            setListAdapter(new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_activated_1, filesNamePlayListList ));
+            setListAdapter(new ArrayAdapter<String>(activity, R.layout.layout_for_playlist_item, R.id.text1,filesNamePlayListList ));
+            //setListAdapter(new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_activated_1,filesNamePlayListList ));
+            getListView().setItemChecked(0, true); //headlight first file playlist
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             mBound = false;
+        }
+    };
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Get extra data included in the Intent
+            String newnowPlayingFileString = intent.getStringExtra("NewnowPlayingFileString");
+            Log.d("receiver", "Got message: " + newnowPlayingFileString);
+
+            int position = playListArrayList.indexOf(newnowPlayingFileString);
+            getListView().setItemChecked(position, true);
+
         }
     };
 
@@ -115,14 +136,14 @@ public class PlayListFragment extends ListFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_play_list, container, false);
+        View v = inflater.inflate(R.layout.fragment_play_list, container, false);
+        return v;
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        if(mBound == true){
+        if(mBound == true) {
             mConnectAndPlayService.playPlayListFromIndex(position);
         }
     }
@@ -140,6 +161,9 @@ public class PlayListFragment extends ListFragment {
         // Bind to ConnectAndPlayService
         Intent intent = new Intent(applicationContext, ConnectAndPlayService.class);
         applicationContext.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
+        LocalBroadcastManager.getInstance(applicationContext).registerReceiver(mMessageReceiver, new IntentFilter("nowPlayingFileStringChange"));
+
     }
 
     @Override
@@ -150,7 +174,10 @@ public class PlayListFragment extends ListFragment {
             applicationContext.unbindService(mConnection);
             mBound = false;
         }
+
+        LocalBroadcastManager.getInstance(applicationContext).unregisterReceiver(mMessageReceiver);
     }
+
 
     @Override
     public void onAttach(Activity activity) {
