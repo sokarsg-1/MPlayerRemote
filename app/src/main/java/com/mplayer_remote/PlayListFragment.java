@@ -20,10 +20,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -65,8 +70,10 @@ public class PlayListFragment extends ListFragment {
                 String justFileName = fullFileName.substring(positionOfLastDash + 1);
                 filesNamePlayListList.add(justFileName);
             }
-            setListAdapter(new ArrayAdapter<String>(activity, R.layout.layout_for_playlist_item, R.id.text1,filesNamePlayListList ));
+            //setListAdapter(new ArrayAdapter<String>(activity, R.layout.layout_for_playlist_item, R.id.text1, filesNamePlayListList));
             //setListAdapter(new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_activated_1,filesNamePlayListList ));
+            PlayListListAdapter myPlayListListAdapter = new PlayListListAdapter(activity, filesNamePlayListList);
+            setListAdapter(myPlayListListAdapter);
             //Headlight now played file
             getListView().setItemChecked(playListArrayList.indexOf(mConnectAndPlayService.getNowPlayingFileString()), true); //headlight first file playlist
         }
@@ -142,12 +149,14 @@ public class PlayListFragment extends ListFragment {
         return v;
     }
 
+    /*
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         if(mBound == true) {
             mConnectAndPlayService.playPlayListFromIndex(position);
         }
     }
+    */
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -214,4 +223,89 @@ public class PlayListFragment extends ListFragment {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
     }
+
+    private class PlayListListAdapter extends BaseAdapter implements ListAdapter {
+
+        private Context context = null;
+        private List<String> playListArrayList = null;
+
+        PlayListListAdapter(Context context, List<String> playListArrayList){
+            this.context = context;
+            this.playListArrayList = playListArrayList;
+        }
+
+        @Override
+        public int getCount() {
+            return playListArrayList.size();
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return playListArrayList.get(i);
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return 0;
+        }
+
+        @Override
+        public View getView(final int position, View convertView, ViewGroup parent) {
+            View view = convertView;
+            if (view == null) {
+                LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                view = inflater.inflate(R.layout.layout_for_playlist_item, null);
+            }
+
+            //Handle TextView and display string from your list
+            TextView listItemText = (TextView)view.findViewById(R.id.text1);
+            listItemText.setText(playListArrayList.get(position));
+
+            //Handle buttons and add onClickListeners
+            ImageButton removeFromPlaylistButton = (ImageButton)view.findViewById(R.id.remove_from_playlist_button);
+            ImageButton upInPlaylistButton = (ImageButton)view.findViewById(R.id.up_in_playlist_button);
+            ImageButton down_in_playlist_button =(ImageButton)view.findViewById(R.id.down_in_playlist_button);
+
+            listItemText.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    getListView().setItemChecked(position, true); //headlight first file playlist
+                    if(mBound == true) {
+                        mConnectAndPlayService.playPlayListFromIndex(position);
+                    }
+                }
+            });
+
+            removeFromPlaylistButton.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v) {
+                    if (playListArrayList.size() > 1) {
+                        playListArrayList.remove(position); //or some other task
+                        notifyDataSetChanged();
+                    }
+                }
+            });
+            upInPlaylistButton.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v) {
+                    if (position > 0){
+                        Collections.swap(playListArrayList, position, position - 1);
+                    }
+                    notifyDataSetChanged();
+                }
+            });
+            down_in_playlist_button.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View view) {
+                    if (position < playListArrayList.size() - 1){
+                        Collections.swap(playListArrayList, position, position + 1);
+                    }
+                    notifyDataSetChanged();
+                }
+            });
+
+            return view;
+        }
+    }
+
 }

@@ -1,25 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    >
-    <!--<Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@drawable/play_button"/>-->
+    android:background="?android:attr/activatedBackgroundIndicator">
 
     <!--from https://github.com/android/platform_frameworks_base/blob/master/core/res/res/layout/simple_list_item_activated_1.xml-->
     <TextView xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/text1"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceListItemSmall"
         android:gravity="center_vertical"
+        android:layout_alignParentLeft="true"
         android:paddingStart="?android:attr/listPreferredItemPaddingStart"
         android:paddingLeft="?android:attr/listPreferredItemPaddingLeft"
         android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
         android:paddingRight="?android:attr/listPreferredItemPaddingRight"
-        android:background="?android:attr/activatedBackgroundIndicator"
-        android:minHeight="?android:attr/listPreferredItemHeightSmall" />
-</LinearLayout>
+
+        android:minHeight="?android:attr/listPreferredItemHeightSmall"
+
+        android:layout_toLeftOf="@+id/down_in_playlist_button"
+        android:text="A very very long test text"
+        android:ellipsize="end"
+        android:maxLines="1"
+        />
+
+    <ImageButton
+        android:id="@+id/down_in_playlist_button"
+        android:layout_width="40sp"
+        android:layout_height="40sp"
+        android:layout_toLeftOf="@+id/up_in_playlist_button"
+        android:layout_centerVertical="true"
+        android:src="@android:drawable/arrow_down_float" />
+
+    <ImageButton
+        android:id="@+id/up_in_playlist_button"
+        android:layout_width="40sp"
+        android:layout_height="40sp"
+        android:layout_toLeftOf="@+id/remove_from_playlist_button"
+        android:layout_centerVertical="true"
+        android:src="@android:drawable/arrow_up_float" />
+
+    <ImageButton
+        android:id="@+id/remove_from_playlist_button"
+        android:layout_width="40sp"
+        android:layout_height="40sp"
+        android:layout_marginRight="5sp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:src="@android:drawable/ic_menu_delete" />
+
+</RelativeLayout>
