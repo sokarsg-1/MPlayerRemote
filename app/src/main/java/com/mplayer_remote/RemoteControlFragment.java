@@ -190,6 +190,12 @@ public class RemoteControlFragment extends Fragment {
             ConnectAndPlayService.LocalBinder binder = (ConnectAndPlayService.LocalBinder) service;
             mConnectAndPlayService = binder.getService();
             mBound = true;
+
+            //set a nowPlayFileNameTextView
+            fileToPlayString = mConnectAndPlayService.getNowPlayingFileString();
+            int positionOfLastDashint = fileToPlayString.lastIndexOf("/");
+            String substringfileToPlayString = fileToPlayString.substring(positionOfLastDashint + 1);
+            nowPlayFileNameTextView.setText(substringfileToPlayString);
         }
 
         @Override
