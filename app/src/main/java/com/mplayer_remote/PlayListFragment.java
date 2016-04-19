@@ -67,7 +67,8 @@ public class PlayListFragment extends ListFragment {
             }
             setListAdapter(new ArrayAdapter<String>(activity, R.layout.layout_for_playlist_item, R.id.text1,filesNamePlayListList ));
             //setListAdapter(new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_activated_1,filesNamePlayListList ));
-            getListView().setItemChecked(0, true); //headlight first file playlist
+            //Headlight now played file
+            getListView().setItemChecked(playListArrayList.indexOf(mConnectAndPlayService.getNowPlayingFileString()), true); //headlight first file playlist
         }
 
         @Override
