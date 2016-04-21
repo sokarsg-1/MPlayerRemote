@@ -26,10 +26,15 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -78,6 +83,11 @@ public class ConnectAndPlayService extends Service {
     private ExecutorService es = Executors.newSingleThreadExecutor();
 
     /**
+     * List of runables submited to es.
+     */
+    private List<Future> futuresPlayListList = new ArrayList<Future>();
+
+    /**
      * Now playing file in mplayer;
      */
     private String nowPlayingFileString = null;
@@ -90,7 +100,7 @@ public class ConnectAndPlayService extends Service {
     /**
      * A playList from FileChooser
      */
-    List<String>  playListArrayList = null;
+    private List<String>  playListArrayList = null;
     /**
      * NotificationManager
      */
@@ -188,6 +198,7 @@ public class ConnectAndPlayService extends Service {
         this.absolutePathString = absolutePathString;
 
         es = Executors.newSingleThreadExecutor();
+        futuresPlayListList = new ArrayList<Future>();
 
         while (!isfifofileExist()){
             sendCommand("rm fifofile");
@@ -216,7 +227,7 @@ public class ConnectAndPlayService extends Service {
             myRunnablesArrayList.add(r);
         }
         for(Runnable r : myRunnablesArrayList){
-            es.submit(r);
+            futuresPlayListList.add(es.submit(r));
         }
 
         es.submit(new Runnable() {  //stops after reach end of playlist
@@ -231,12 +242,19 @@ public class ConnectAndPlayService extends Service {
     }
 
     /**
-     * Called by playNextMedia() and playPreviousMedia() to play a sublist from user selected playlist
+     * Called by playNextMedia() and playPreviousMedia() and PlayListFragment to play a sublist from user selected playlist
      * @param filesToPlayArrayList sublist of filesToPlayArrayList to play.
      */
     private void playASubPlayList (List<String>  filesToPlayArrayList, final String absolutePathString){
+        //Log.v(TAG, "size is: " + filesToPlayArrayList.size());
+        //List<String> copyOffilesToPlayArrayList = new ArrayList<String>(filesToPlayArrayList);
+        //Collections.copy(copyOffilesToPlayArrayList, filesToPlayArrayList);
+
+        //String[] filesToPlayArray = filesToPlayArrayList.toArray(new String[0]);
 
         es = Executors.newSingleThreadExecutor();
+        futuresPlayListList = new ArrayList<Future>();
+
         ArrayList<Runnable> myRunnablesArrayList = new ArrayList<Runnable>(filesToPlayArrayList.size());
         for(final String file : filesToPlayArrayList){
             Runnable r = new Runnable() {
@@ -252,7 +270,7 @@ public class ConnectAndPlayService extends Service {
             myRunnablesArrayList.add(r);
         }
         for(Runnable r : myRunnablesArrayList){
-            es.submit(r);
+            futuresPlayListList.add(es.submit(r));
         }
 
         es.submit(new Runnable() {  //stops after reach end of playlist
@@ -315,7 +333,7 @@ public class ConnectAndPlayService extends Service {
     public void playPlayListFromIndex(int index){
         List<String> localPlaylist;
         stopPlayingPlayList();
-        localPlaylist = playListArrayList.subList(index,playListArrayList.size());
+        localPlaylist = playListArrayList.subList(index, playListArrayList.size());
         playASubPlayList(localPlaylist, absolutePathString);
     }
 
@@ -337,6 +355,69 @@ public class ConnectAndPlayService extends Service {
         }
     }
 
+//    /**
+//     * Update a PlayList. Used in PlayListFragment
+//     */
+//    public void updateplayListArrayList(List<String> updatedPlayList){
+//        this.playListArrayList = updatedPlayList;
+//    }
+
+    /**
+     * Remove a file from a playlist.
+     */
+    public void removeFileFromPlayList(int position){
+        playListArrayList.remove(position);
+        //futuresPlayListList.get(position).cancel(true);
+        stopPlayingPlayList();
+        playPlayListFromIndex(playListArrayList.indexOf(getNowPlayingFileString()));
+    }
+
+    /**
+     * Swap files position in playlist.
+     * @param startindex
+     * @param endindex
+     */
+
+    public void swapFilesInPlayList(int startindex, int endindex){
+        stopPlayingPlayList();
+        Collections.swap(playListArrayList, startindex, endindex);
+        playPlayListFromIndex(playListArrayList.indexOf(getNowPlayingFileString()));
+    }
+
+//    /**
+//     * Stops playing next files form PlayList.
+//     */
+//    public void playASubPlayListAfterNowPlayedFile(final List<String>playListList, final String absolutePathString){
+//        //final String absolutePathStringCloned = new String(absolutePathString);
+//        //final List<String> playListListCloned = new ArrayList<String>();
+//        //for (String file : playListList){
+//            //playListListCloned.add(new String(file));
+//        //}
+//
+//        //TODO must wait for Exiting... (Quit) mplayer mesage
+//        ies.execute(new Runnable(){
+//            @Override
+//            public void run() {
+//                mplayerOutputArrayListLock.lock();
+//                try {
+//                    while (mplayerOutputArrayList.isEmpty() || !mplayerOutputArrayList.get(mplayerOutputArrayList.size() - 1).contains("Exiting...")) {
+//                        newMplayerOutputCondition.await();
+//                    }
+//                    stopPlayingPlayList();
+//                    playASubPlayList(playListList, absolutePathString);
+//                }catch (InterruptedException ie){
+//                    //Thread.currentThread().interrupt();
+//                    ie.printStackTrace();
+//                }finally {
+//                    mplayerOutputArrayListLock.unlock();
+//                }
+//            }
+//        });
+//
+//    }
+
+
+
     /**
      * Return now played file.
      */
@@ -344,18 +425,19 @@ public class ConnectAndPlayService extends Service {
         return nowPlayingFileString;
     }
 
-    /**
-     * Return current absolutePathString.
-     */
-    public String getAbsolutePathString(){
-        return absolutePathString;
-    }
+
+//    /**
+//     * Return current absolutePathString.
+//     */
+//    public String getAbsolutePathString(){
+//        return absolutePathString;
+//    }
 
     /**
      * Return current playListArrayList
      */
     public List<String> getPlayListArrayList(){
-        return playListArrayList;
+        return Collections.unmodifiableList(playListArrayList);
     }
 
     /**
@@ -880,6 +962,8 @@ public class ConnectAndPlayService extends Service {
         }
 
     }
+
+
 
 }
 

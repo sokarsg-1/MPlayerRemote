@@ -18,13 +18,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -45,10 +41,6 @@ public class PlayListFragment extends ListFragment {
     private Activity activity = null;
     private Context applicationContext = null;
 
-    /**
-     * A playList from FileChooser
-     */
-    List<String> playListArrayList = null;
 
     private ConnectAndPlayService mConnectAndPlayService;
     private boolean mBound = false;
@@ -63,19 +55,13 @@ public class PlayListFragment extends ListFragment {
             mConnectAndPlayService = binder.getService();
             mBound = true;
 
-            playListArrayList = mConnectAndPlayService.getPlayListArrayList();
-            List<String> filesNamePlayListList = new ArrayList<String>();
-            for (String fullFileName: playListArrayList) {
-                int positionOfLastDash = fullFileName.lastIndexOf("/");
-                String justFileName = fullFileName.substring(positionOfLastDash + 1);
-                filesNamePlayListList.add(justFileName);
-            }
+
             //setListAdapter(new ArrayAdapter<String>(activity, R.layout.layout_for_playlist_item, R.id.text1, filesNamePlayListList));
             //setListAdapter(new ArrayAdapter<String>(activity, android.R.layout.simple_list_item_activated_1,filesNamePlayListList ));
-            PlayListListAdapter myPlayListListAdapter = new PlayListListAdapter(activity, filesNamePlayListList);
+            PlayListListAdapter myPlayListListAdapter = new PlayListListAdapter(activity, mConnectAndPlayService.getPlayListArrayList());
             setListAdapter(myPlayListListAdapter);
             //Headlight now played file
-            getListView().setItemChecked(playListArrayList.indexOf(mConnectAndPlayService.getNowPlayingFileString()), true); //headlight first file playlist
+            getListView().setItemChecked(mConnectAndPlayService.getPlayListArrayList().indexOf(mConnectAndPlayService.getNowPlayingFileString()), true); //headlight first file playlist
         }
 
         @Override
@@ -91,8 +77,10 @@ public class PlayListFragment extends ListFragment {
             String newnowPlayingFileString = intent.getStringExtra("NewnowPlayingFileString");
             Log.d("receiver", "Got message: " + newnowPlayingFileString);
 
-            int position = playListArrayList.indexOf(newnowPlayingFileString);
-            getListView().setItemChecked(position, true);
+            if (mBound == true) {
+                int position = mConnectAndPlayService.getPlayListArrayList().indexOf(newnowPlayingFileString);
+                getListView().setItemChecked(position, true);
+            }
 
         }
     };
@@ -227,21 +215,22 @@ public class PlayListFragment extends ListFragment {
     private class PlayListListAdapter extends BaseAdapter implements ListAdapter {
 
         private Context context = null;
-        private List<String> playListArrayList = null;
+        private List<String> playListList = null;   //a list of full path to file
+        private List<String> filesNamePlayListList = null;  //just a files names
 
-        PlayListListAdapter(Context context, List<String> playListArrayList){
+        PlayListListAdapter(Context context, List<String> playListList){
             this.context = context;
-            this.playListArrayList = playListArrayList;
+            this.playListList = playListList;
         }
 
         @Override
         public int getCount() {
-            return playListArrayList.size();
+            return playListList.size();
         }
 
         @Override
         public Object getItem(int i) {
-            return playListArrayList.get(i);
+            return playListList.get(i);
         }
 
         @Override
@@ -257,9 +246,17 @@ public class PlayListFragment extends ListFragment {
                 view = inflater.inflate(R.layout.layout_for_playlist_item, null);
             }
 
+            playListList = mConnectAndPlayService.getPlayListArrayList();
+            filesNamePlayListList = new ArrayList<String>();
+            for (String fullFileName: playListList) {
+                int positionOfLastDash = fullFileName.lastIndexOf("/");
+                String justFileName = fullFileName.substring(positionOfLastDash + 1);
+                filesNamePlayListList.add(justFileName);
+            }
+
             //Handle TextView and display string from your list
             TextView listItemText = (TextView)view.findViewById(R.id.text1);
-            listItemText.setText(playListArrayList.get(position));
+            listItemText.setText(filesNamePlayListList.get(position));
 
             //Handle buttons and add onClickListeners
             ImageButton removeFromPlaylistButton = (ImageButton)view.findViewById(R.id.remove_from_playlist_button);
@@ -279,9 +276,15 @@ public class PlayListFragment extends ListFragment {
             removeFromPlaylistButton.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v) {
-                    if (playListArrayList.size() > 1) {
-                        playListArrayList.remove(position); //or some other task
-                        notifyDataSetChanged();
+                    if(mBound == true) {
+                        if (!filesNamePlayListList.get(position).equals(mConnectAndPlayService.getNowPlayingFileString().substring(mConnectAndPlayService.getNowPlayingFileString().lastIndexOf("/") + 1))) {
+                            //for ListView
+                            filesNamePlayListList.remove(position);
+                            notifyDataSetChanged();
+
+                            //for ConnectAndPlayService
+                            mConnectAndPlayService.removeFileFromPlayList(position);
+                        }
                     }
                 }
             });
@@ -289,16 +292,21 @@ public class PlayListFragment extends ListFragment {
                 @Override
                 public void onClick(View v) {
                     if (position > 0){
-                        Collections.swap(playListArrayList, position, position - 1);
+                        if (mBound == true) {
+                            mConnectAndPlayService.swapFilesInPlayList(position, position - 1);
+                        }
                     }
                     notifyDataSetChanged();
+
                 }
             });
             down_in_playlist_button.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View view) {
-                    if (position < playListArrayList.size() - 1){
-                        Collections.swap(playListArrayList, position, position + 1);
+                    if (position < playListList.size() - 1){
+                        if(mBound == true) {
+                            mConnectAndPlayService.swapFilesInPlayList(position, position + 1);
+                        }
                     }
                     notifyDataSetChanged();
                 }
