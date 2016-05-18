@@ -301,6 +301,17 @@ public class RemoteControlFragment extends Fragment {
             }
         });
 
+        Button switchAudioButton = (Button) rootView.findViewById(R.id.switch_audio_button);
+        switchAudioButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                if( mBound == true ) {
+                    mConnectAndPlayService.sendCommand("echo pausing_keep_force switch_audio> fifofile");
+                    mVibrator.vibrate(50);
+                }
+            }
+        });
+
         Button stopButton = (Button) rootView.findViewById(R.id.stop_button);
         stopButton.setOnClickListener(new View.OnClickListener() {
 
