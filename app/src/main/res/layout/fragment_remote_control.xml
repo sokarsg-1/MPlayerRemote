@@ -14,6 +14,14 @@
             android:layout_alignParentLeft="true"/>
 
         <Button
+            android:id="@+id/switch_audio_button"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/switch_audio_button"
+            android:layout_toRightOf="@+id/fullscreean_button"
+            />
+
+        <Button
             android:layout_height="70dp"
             android:background="@drawable/stop_button"
             android:id="@+id/stop_button" android:layout_width="70dp"
@@ -33,16 +41,16 @@
             android:id="@+id/step_10_second_forward_button"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:layout_above="@+id/seekBar"
-            android:layout_toLeftOf="@+id/stop_button" />
+            android:layout_alignTop="@+id/pause_button"
+            android:layout_alignParentRight="true" />
 
         <Button
             android:background="@drawable/next_media_button"
             android:id="@+id/next_media_button"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:layout_alignTop="@+id/pause_button"
-            android:layout_alignParentRight="true" />
+            android:layout_above="@id/step_10_second_forward_button"
+            android:layout_alignParentRight="true"/>
 
         <Button
             android:background="@drawable/step_10_second_backward_button"
@@ -50,15 +58,14 @@
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:layout_alignTop="@+id/pause_button"
-            android:layout_toRightOf="@+id/fullscreean_button"
-            android:layout_toEndOf="@+id/fullscreean_button" />
+            android:layout_alignParentLeft="true" />
 
         <Button
             android:background="@drawable/previous_media_button"
             android:id="@+id/previous_media_button"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:layout_alignTop="@+id/pause_button"
+            android:layout_above="@id/step_10_second_backward_button"
             android:layout_alignParentLeft="true"/>
 
         <SeekBar
@@ -92,10 +99,11 @@
             android:inputType="textMultiLine"
             android:id="@+id/now_play_textView"
             android:layout_below="@+id/time_length_textView"
+            android:layout_marginTop="30dp"
             android:layout_centerHorizontal="true"
             android:text="now_play"
             android:gravity="center"
-            android:textAppearance="@android:style/TextAppearance.Medium" />
+            android:textAppearance="@android:style/TextAppearance.Medium"/>
 
     </RelativeLayout>
 

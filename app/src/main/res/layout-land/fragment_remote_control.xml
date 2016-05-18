@@ -14,6 +14,14 @@
                 android:layout_alignParentLeft="true"/>
 
             <Button
+                android:id="@+id/switch_audio_button"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:background="@drawable/switch_audio_button"
+                android:layout_toRightOf="@+id/fullscreean_button"
+                />
+
+            <Button
                 android:layout_height="70dp"
                 android:background="@drawable/stop_button"
                 android:id="@+id/stop_button" android:layout_width="70dp"
