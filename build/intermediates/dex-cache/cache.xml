@@ -12,14 +12,14 @@
         jar="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
         jumboMode="true"
         revision="23.0.1"
-        sha1="8ce53c935c917f8446c960d1666d7fbab8f33c4a">
+        sha1="9485e128e7d808b33510bc0e06ced13c5c427c8f">
         <dex dex="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_cf78ab046ba71db098c3618f5fe1ee2493a59734/classes.dex" />
     </item>
     <item
         jar="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
         jumboMode="true"
         revision="23.0.1"
-        sha1="66121f3a7be01eed2e995f97b69cfebffc34bbae">
+        sha1="b44afa8c9ba296be7c9e5a3c70dd8508edd5e7df">
         <dex dex="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_c4c1af933eda11dd9eeeafa3a45a1d307c4b4387/classes.dex" />
     </item>
 
