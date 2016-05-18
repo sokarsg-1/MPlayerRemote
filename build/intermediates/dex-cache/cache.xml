@@ -3,10 +3,24 @@
 
     <item
         jar="/home/sokar/Android/Sdk/extras/android/m2repository/com/android/support/support-v4/19.1.0/support-v4-19.1.0.jar"
-        jumboMode="false"
+        jumboMode="true"
         revision="23.0.1"
         sha1="85f201b380937e61a9dce6ca90ccf6872abbfb67">
-        <dex dex="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/pre-dexed/debug/support-v4-19.1.0-fd9dc4593bd7c9da74803a79f2f8dea72152e980.jar" />
+        <dex dex="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/transforms/dex/debug/folders/1000/10/support-v4-19.1.0_fd9dc4593bd7c9da74803a79f2f8dea72152e980/classes.dex" />
+    </item>
+    <item
+        jar="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
+        jumboMode="true"
+        revision="23.0.1"
+        sha1="8ce53c935c917f8446c960d1666d7fbab8f33c4a">
+        <dex dex="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_cf78ab046ba71db098c3618f5fe1ee2493a59734/classes.dex" />
+    </item>
+    <item
+        jar="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
+        jumboMode="true"
+        revision="23.0.1"
+        sha1="66121f3a7be01eed2e995f97b69cfebffc34bbae">
+        <dex dex="/home/sokar/AndroidStudioProjects/MPlayerRemote/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_c4c1af933eda11dd9eeeafa3a45a1d307c4b4387/classes.dex" />
     </item>
 
 </items>
